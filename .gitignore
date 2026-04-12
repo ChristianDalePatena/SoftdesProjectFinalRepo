@@ -1,0 +1,16 @@
+.env
+*.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
+db.sqlite3
+media/
+node_modules/
+dist/
+.vite/
+.DS_Store
+Thumbs.db
+.vscode/
