@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // --- ALL 30 PRODUCTS LINKED TO THE NEW FORMS ---
@@ -44,15 +44,78 @@ const shopItems = [
   { id: "backlit", name: "Backlit Signage", img: "/images/5/backlit.jpg", category: "Signage" }
 ];
 
+// --- SCROLL REVEAL CARD ---
+function ProductCard({ item, index }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Link
+      ref={ref}
+      to={`/product/${item.id}`}
+      className={`
+        w-full max-w-md bg-[#0a0f14] rounded-3xl shadow-lg hover:shadow-[0_0_20px_rgba(220,38,38,0.2)]
+        border border-gray-800 overflow-hidden hover:border-red-500/50 transition-all duration-500
+        transform hover:-translate-y-2
+        ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}
+      `}
+      style={{ transitionDelay: `${index * 40}ms` }}
+    >
+      {/* Product Image - Taller (h-56) for better landscape proportions */}
+      <div className="h-48 bg-black/20 relative overflow-hidden">
+        <img
+          src={item.img}
+          alt={item.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+
+        {/* Kept the category badge but styled it to be minimal */}
+        <span className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full text-gray-200 border border-white/10 shadow-sm uppercase tracking-widest">
+          {item.category}
+        </span>
+      </div>
+
+      {/* Details - Clean and centered */}
+      <div className="p-6 bg-[#1a232e] text-center border-t border-gray-800">
+        {/* UPDATED: minimalist font (font-thin/light) */}
+        <h2 className="text-xl font-light tracking-wide text-white group-hover:text-red-500 transition-colors">
+          {item.name}
+        </h2>
+
+        {/* Configure Button - Hover effect only to keep it clean */}
+        <div className="mt-6 w-full text-center bg-[#111820] text-gray-400 border border-gray-700 font-bold py-3 rounded-2xl group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all duration-300 text-xs uppercase tracking-widest shadow-sm">
+          Order Now
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Shop() {
   return (
-    <div className="flex-1 bg-gray-300 py-16 md:py-24 font-sans">
+    <div className="flex-1 bg-gradient-to-b from-gray-200 to-gray-300 pt-10 md:pt-14 pb-20 md:pb-28 font-sans">
       <div className="max-w-[90rem] mx-auto px-6 md:px-12">
-        
+
         {/* Header */}
-        <div className="mb-16 flex flex-col items-center text-center max-w-2xl mx-auto">
+        <div className="mb-10 flex flex-col items-center text-center max-w-2xl mx-auto">
           {/* UPDATED: Changed to font-thin and tracking-widest for minimalist look */}
-          <h1 className="text-4xl md:text-5xl font-thin text-gray-900 tracking-widest uppercase mb-4">
+          <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-widest uppercase mb-2">
             Our Catalog
           </h1>
           <p className="text-gray-700 text-lg md:text-xl font-light">
@@ -61,43 +124,9 @@ export default function Shop() {
         </div>
 
         {/* Shop Grid - Added justify-items-center to keep wide cards centered if they wrap */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 justify-items-center">
-          {shopItems.map((item) => (
-            <Link 
-              key={item.id} 
-              to={`/product/${item.id}`} 
-              // UPDATED: w-96 for fat/wide cards, removed flex-col to simplify structure
-              className="w-full max-w-md bg-[#0a0f14] rounded-3xl shadow-lg hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] border border-gray-800 overflow-hidden hover:border-red-500/50 transition-all duration-500 transform hover:-translate-y-2 group"
-            >
-              
-              {/* Product Image - Taller (h-56) for better landscape proportions */}
-              <div className="h-56 bg-black/20 relative overflow-hidden">
-                <img 
-                  src={item.img} 
-                  alt={item.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100" 
-                  onError={(e) => { e.target.src = 'https://placehold.co/600x400/111820/999999?text=Image+Coming+Soon' }} 
-                />
-                {/* Kept the category badge but styled it to be minimal */}
-                <span className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full text-gray-200 border border-white/10 shadow-sm uppercase tracking-widest">
-                  {item.category}
-                </span>
-              </div>
-
-              {/* Details - Clean and centered */}
-              <div className="p-6 bg-[#1a232e] text-center border-t border-gray-800"> 
-                {/* UPDATED: minimalist font (font-thin/light) */}
-                <h2 className="text-xl font-light tracking-wide text-white group-hover:text-red-500 transition-colors">
-                  {item.name}
-                </h2>
-                
-                {/* Configure Button - Hover effect only to keep it clean */}
-                <div className="mt-6 w-full text-center bg-[#111820] text-gray-400 border border-gray-700 font-bold py-3 rounded-2xl group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all duration-300 text-xs uppercase tracking-widest shadow-sm">
-                  Configure Order
-                </div>
-              </div>
-
-            </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 justify-items-center">
+          {shopItems.map((item, index) => (
+            <ProductCard key={item.id} item={item} index={index} />
           ))}
         </div>
 

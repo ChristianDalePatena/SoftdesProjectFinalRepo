@@ -1,8 +1,6 @@
 import { useState, useRef } from "react"
 import { 
-  FiFileText, FiPrinter, FiTruck, 
-  FiMapPin, FiPackage, FiUploadCloud, FiCheckCircle, FiMessageCircle, FiPhoneCall,
-  FiCopy, FiSettings, FiImage
+  FiFileText, FiTruck, FiMapPin, FiPackage, FiUploadCloud, FiCheckCircle
 } from "react-icons/fi";
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
@@ -11,6 +9,17 @@ const inputCls =
 "focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition placeholder:text-gray-400"
 
 const selectCls = inputCls + " cursor-pointer"
+
+// ── LANYARD PRICING MAP ───────────────────────────────────────────────────────
+const LANYARD_PRICING = {
+"1 inch Polyester": 65,
+"3/4 inch Polyester": 45,
+"1/2 inch Polyester": 35,
+"1 inch Cotton": 80,
+"3/4 inch Cotton": 60,
+"1 inch Satin": 85,
+"3/4 inch Satin": 65
+}
 
 function SectionCard({ title, icon, children }) {
 return (
@@ -54,20 +63,15 @@ return (
 }
 
 // ── Pricing logic ──────────────────────────────────────────────────────────────
-function computePrice({ paperSize, colorMode, qty }) {
-let unit = 1.00 
-if (paperSize === "A3") unit = 5.00
-if (colorMode === "Full Color") unit += 4.00
+function computePrice({ lanyardType, qty }) {
+let unit = LANYARD_PRICING[lanyardType] || 0
 return { unitPrice: unit, total: unit * qty }
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function PhotocopyOrderForm() {
-const [paperSize, setPaperSize] = useState("Short (8.5x11)")
-const [qty, setQty]             = useState(1)
-const [paperType, setPaperType] = useState("Regular 70gsm")
-const [colorMode, setColorMode] = useState("Black & White")
-const [sides, setSides]         = useState("Single-sided")
+const [lanyardType, setLanyardType] = useState("1 inch Polyester")
+const [qty, setQty]             = useState(30)
 const [file, setFile]           = useState(null)
 const [instructions, setInstructions] = useState("")
 const fileRef = useRef()
@@ -76,14 +80,14 @@ const [delivery, setDelivery] = useState("Pickup")
 const [address, setAddress]   = useState("")
 const [errors, setErrors] = useState({})
 
-const { unitPrice, total } = computePrice({ paperSize, colorMode, qty })
+const { unitPrice, total } = computePrice({ lanyardType, qty })
 
-const quickQty = [1, 5, 10, 20, 50]
+const quickQty = [30, 50, 100, 200, 500]
 
 // ── Validation ─────────────────────────────────────────
 const validate = () => {
     const e = {}
-    if (qty < 1) e.qty = "Minimum quantity is 1"
+    if (qty < 30) e.qty = "Minimum quantity is 30 pcs"
     if (delivery === "Delivery" && !address.trim()) e.address = "Please enter a delivery address"
     setErrors(e)
     return Object.keys(e).length === 0
@@ -91,185 +95,219 @@ const validate = () => {
 
 const handleSubmit = () => {
     if (!validate()) return
-    alert(`✅ Order submitted!\n\nPhotocopy ${paperSize}\nQty: ${qty}\nTotal: ₱${total.toLocaleString()}`)
+    alert(`✅ Order submitted!\n\nLanyard: ${lanyardType}\nQty: ${qty}\nTotal: ₱${total.toLocaleString()}`)
 }
 
+// Removed Unit Price from here since it's now in the breakdown section
 const summaryRows = [
-    { label: "Paper Size", value: paperSize },
-    { label: "Paper Type", value: paperType },
-    { label: "Quantity", value: `${qty} sets` },
-    { label: "Color Mode", value: colorMode },
-    { label: "Sides", value: sides },
+    { label: "Lanyard Type", value: lanyardType },
+    { label: "Quantity", value: `${qty} pc${qty > 1 ? "s" : ""}` },
+    { label: "Color Mode", value: "Standard Print" },
+    { label: "Sides", value: "Single-sided" },
 ]
 
 // ── UI ─────────────────────────────────────────
 return (
 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-{/* LEFT */}
-<div className="xl:col-span-2 flex flex-col gap-6">
+    {/* LEFT */}
+    <div className="xl:col-span-2 flex flex-col gap-6">
 
-<SectionCard title="Document Details" icon={<FiFileText />}>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <SectionCard title="Lanyard Details" icon={<FiFileText />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-        <Field label="Paper Size">
-            <select value={paperSize} onChange={(e) => setPaperSize(e.target.value)} className={selectCls}>
-                <option>Short (8.5x11)</option>
-                <option>A4</option>
-                <option>Long (8.5x13)</option>
-                <option>A3</option>
-            </select>
-        </Field>
+            <Field label="Lanyard Type">
+                <select value={lanyardType} onChange={(e) => setLanyardType(e.target.value)} className={selectCls}>
+                    <option>1 inch Polyester</option>
+                    <option>3/4 inch Polyester</option>
+                    <option>1/2 inch Polyester</option>
+                    <option>1 inch Cotton</option>
+                    <option>3/4 inch Cotton</option>
+                    <option>1 inch Satin</option>
+                    <option>3/4 inch Satin</option>
+                </select>
+            </Field>
 
-        <Field label="Sets / Quantity" required>
-            <div className="flex gap-2 mb-2">
-                {quickQty.map((n) => (
-                    <button
-                        key={n}
-                        type="button"
-                        onClick={() => setQty(n)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                            qty === n
-                                ? "bg-red-500 text-white border-red-500"
-                                : "bg-gray-50 text-gray-600 border-gray-200"
-                        }`}
-                    >
-                        {n}
-                    </button>
-                ))}
-            </div>
-
-            <input
-                type="number"
-                min={1}
-                value={qty}
-                onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-                className={inputCls + (errors.qty ? " border-red-400 ring-1 ring-red-300" : "")}
-            />
-            {errors.qty && <p className="text-[11px] text-red-500 mt-0.5">{errors.qty}</p>}
-        </Field>
-
-    </div>
-</SectionCard>
-
-<SectionCard title="Print Settings" icon={<FiSettings />}>
-    <div className="flex flex-col gap-5">
-
-        <Field label="Color Mode">
-            <div className="flex gap-3">
-                {["Black & White", "Full Color"].map((mode) => (
-                    <ToggleBtn key={mode} active={colorMode === mode} onClick={() => setColorMode(mode)}>
-                        {mode === "Full Color" ? <FiImage /> : <FiCopy />} {mode}
-                    </ToggleBtn>
-                ))}
-            </div>
-        </Field>
-
-        <Field label="Sides">
-            <div className="flex gap-3">
-                {["Single-sided", "Back-to-Back"].map((opt) => (
-                    <ToggleBtn key={opt} active={sides === opt} onClick={() => setSides(opt)}>
-                        {opt}
-                    </ToggleBtn>
-                ))}
-            </div>
-        </Field>
-
-    </div>
-</SectionCard>
-
-<SectionCard title="File Upload" icon={<FiUploadCloud />}>
-    <div className="flex flex-col gap-5">
-
-        <Field label="Upload Documents" hint="PDF preferred. Max 100MB">
-            <div
-                onClick={() => fileRef.current.click()}
-                className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl p-8 cursor-pointer hover:border-red-300 hover:bg-red-50 transition group"
-            >
-                <span className={`text-3xl ${file ? "text-green-500" : "text-gray-400"}`}>
-                    {file ? <FiCheckCircle /> : <FiUploadCloud />}
-                </span>
-
-                {file ? (
-                    <p className="text-xs text-green-700 font-semibold">{file.name}</p>
-                ) : (
-                    <p className="text-xs text-gray-500">Click to upload</p>
-                )}
+            <Field label="Quantity (min 30 pcs)" required>
+                <div className="flex gap-2 mb-2">
+                    {quickQty.map((n) => (
+                        <button
+                            key={n}
+                            type="button"
+                            onClick={() => setQty(n)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                                qty === n
+                                    ? "bg-red-500 text-white border-red-500"
+                                    : "bg-gray-50 text-gray-600 border-gray-200"
+                            }`}
+                        >
+                            {n}
+                        </button>
+                    ))}
+                </div>
 
                 <input
-                    ref={fileRef}
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    type="number"
+                    min={30}
+                    value={qty}
+                    onChange={(e) => setQty(Math.max(30, parseInt(e.target.value) || 30))}
+                    className={inputCls + (errors.qty ? " border-red-400 ring-1 ring-red-300" : "")}
                 />
-            </div>
-        </Field>
+                {errors.qty && <p className="text-[11px] text-red-500 mt-0.5">{errors.qty}</p>}
+            </Field>
 
-        <Field label="Instructions">
-            <textarea
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
-                rows={3}
-                className={inputCls + " resize-none"}
-            />
-        </Field>
+        </div>
+    </SectionCard>
 
-    </div>
-</SectionCard>
+    <SectionCard title="File Upload" icon={<FiUploadCloud />}>
+        <div className="flex flex-col gap-5">
 
-<SectionCard title="Delivery Info" icon={<FiTruck />}>
-    <div className="flex flex-col gap-5">
+            <Field label="Upload Design" hint="PNG / JPG preferred">
+                <div
+                    onClick={() => fileRef.current.click()}
+                    className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl p-8 cursor-pointer hover:border-red-300 hover:bg-red-50 transition group"
+                >
+                    <span className={`text-3xl ${file ? "text-green-500" : "text-gray-400"}`}>
+                        {file ? <FiCheckCircle /> : <FiUploadCloud />}
+                    </span>
 
-        <Field label="Method">
-            <div className="flex gap-3">
-                <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
-                    <FiMapPin /> Pickup
-                </ToggleBtn>
-                <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
-                    <FiPackage /> Delivery
-                </ToggleBtn>
-            </div>
-        </Field>
+                    {file ? (
+                        <p className="text-xs text-green-700 font-semibold">{file.name}</p>
+                    ) : (
+                        <p className="text-xs text-gray-500">Click to upload</p>
+                    )}
 
-        {delivery === "Delivery" && (
-            <Field label="Address" required>
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    />
+                </div>
+            </Field>
+
+            <Field label="Instructions">
                 <textarea
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className={inputCls}
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    rows={3}
+                    className={inputCls + " resize-none"}
                 />
             </Field>
-        )}
+
+        </div>
+    </SectionCard>
+
+    <SectionCard title="Delivery Info" icon={<FiTruck />}>
+        <div className="flex flex-col gap-5">
+
+            <Field label="Method">
+                <div className="flex gap-3">
+                    <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
+                        <FiMapPin /> Pickup
+                    </ToggleBtn>
+                    <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
+                        <FiPackage /> Delivery
+                    </ToggleBtn>
+                </div>
+            </Field>
+
+            {delivery === "Delivery" && (
+                <Field label="Address" required>
+                    <textarea
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className={inputCls}
+                    />
+                </Field>
+            )}
+
+        </div>
+    </SectionCard>
 
     </div>
-</SectionCard>
 
-</div>
+    {/* ── RIGHT: Summary ───────────────────────────────── */}
+    <div className="xl:col-span-1">
+    <div className="sticky top-35 flex flex-col gap-4">
 
-{/* RIGHT */}
-<div>
-    <div className="bg-white p-5 rounded-xl shadow">
-        <h2 className="font-bold mb-3">Summary</h2>
-
-        {summaryRows.map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm mb-1">
-                <span>{label}</span>
-                <span>{value}</span>
-            </div>
-        ))}
-
-        <div className="mt-4 font-bold text-red-500">
-            Total: ₱{total.toLocaleString()}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 bg-linear-to-r from-red-500 to-red-600">
+            <h2 className="text-xs font-black uppercase tracking-widest text-white/90">Order Summary</h2>
         </div>
 
-        <button
-            onClick={handleSubmit}
-            className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg"
-        >
-            Place Order
-        </button>
+        <div className="px-6 py-4 flex flex-col gap-2">
+            {summaryRows.map(({ label, value }) => (
+            <div key={label} className="flex items-start justify-between gap-2 text-sm">
+                <span className="text-gray-400 shrink-0">{label}</span>
+                <span className="text-right text-gray-700 font-semibold">{value}</span>
+            </div>
+            ))}
+        </div>
+
+        <div className="mx-6 border-t border-gray-100" />
+
+        {/* Pricing breakdown */}
+        <div className="px-6 py-4 flex flex-col gap-1.5">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Pricing Breakdown</p>
+            <div className="flex justify-between text-xs text-gray-500">
+                <span>{lanyardType}</span>
+                <span>₱{unitPrice.toLocaleString()}/pc</span>
+            </div>
+            
+            <div className="flex justify-between text-sm font-bold text-gray-700 border-t border-gray-100 pt-2 mt-1">
+                <span>Price per piece</span>
+                <span>₱{unitPrice.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-xs text-gray-400">
+                <span>× {qty} pc{qty > 1 ? "s" : ""}</span>
+            </div>
+        </div>
+
+        <div className="mx-6 mb-4 flex items-center justify-between py-3 px-4 bg-red-50 rounded-xl border border-red-100">
+            <span className="text-sm font-black text-gray-700 uppercase tracking-wide">Total</span>
+            <span className="text-2xl font-black text-red-500">₱{total.toLocaleString()}</span>
+        </div>
+
+        <div className="px-6 pb-6">
+            <button
+            type="button" onClick={handleSubmit}
+            className="w-full py-4 bg-red-500 hover:bg-red-600 active:scale-[.98] text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg shadow-red-200 transition-all"
+            >
+            Place Order →
+            </button>
+            <p className="text-[11px] text-gray-400 text-center mt-3">
+            Our team will confirm your order and send a payment link within 24 hours.
+            </p>
+        </div>
+        </div>
+
+        {/* Help Card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💬</span>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+            Not sure about lanyard material or artwork setup? We're happy to help you spec the perfect ID lace.
+        </p>
+        <div className="flex flex-col gap-2">
+            <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            📞 0947-463-1561
+            </a>
+            <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            💬 Chat on Messenger
+            </a>
+            <a href="mailto:picktwoprint@gmail.com"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            ✉️ picktwoprint@gmail.com
+            </a>
+        </div>
+        </div>
+
     </div>
-</div>
+    </div>
 
 </div>
 )

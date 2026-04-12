@@ -1,3 +1,4 @@
+import { FiHome, FiPackage, FiTruck } from "react-icons/fi";
 // ── Shared UI primitives for all product order forms ─────────────────────────
 
 export const inputCls =
@@ -81,7 +82,10 @@ return (
                 : "bg-white text-gray-600 border-gray-200 hover:border-red-300"
             }`}
         >
-            {d === "Pickup" ? "🏪 Pickup" : "📦 Delivery"}
+            <span className="flex items-center justify-center gap-2">
+            {d === "Pickup" ? <FiPackage /> : <FiTruck />}
+            {d}
+            </span>
         </button>
         ))}
     </div>

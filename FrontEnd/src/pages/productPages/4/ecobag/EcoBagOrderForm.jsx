@@ -1,4 +1,9 @@
-import { useState, useRef } from "react"
+import { useState, useRef } from "react";
+import { FiShoppingBag, FiPrinter} from "react-icons/fi";
+import { FaCottonBureau } from "react-icons/fa6";
+import { IoBagOutline } from "react-icons/io5";
+import { MdTexture, MdPolymer, MdLayers, MdPalette, MdWhatshot, MdOpacity, MdGesture} from "react-icons/md"
+
 
 // ── Primitives ─────────────────────────────────────────────────────────────────
 const inputCls =
@@ -324,19 +329,19 @@ const pricing = computePrice({ printMethod, printPlacement, innerPocket, zipper,
 const BAG_TYPES    = ["Tote Bag", "Drawstring Bag", "Canvas Bag", "Foldable Eco Bag"]
 const SIZES        = ["Small", "Medium", "Large", "Custom"]
 const MATERIALS    = [
-{ val: "Cotton",             icon: "🌿", desc: "Soft, breathable, classic eco choice" },
-{ val: "Canvas",             icon: "🧱", desc: "Heavy-duty, structured, long-lasting" },
-{ val: "Non-woven Fabric",   icon: "♻️", desc: "Lightweight, affordable, recyclable" },
-{ val: "Recycled Polyester", icon: "🔄", desc: "Made from post-consumer plastic bottles" },
+{ val: "Cotton",             icon: <FaCottonBureau className="text-lg" />, desc: "Soft, breathable, classic eco choice" },
+{ val: "Canvas",             icon: <IoBagOutline className="text-lg" />, desc: "Heavy-duty, structured, long-lasting" },
+{ val: "Non-woven Fabric",   icon: <MdTexture className="text-lg" />, desc: "Lightweight, affordable, recyclable" },
+{ val: "Recycled Polyester", icon: <MdPolymer className="text-lg" />, desc: "Made from post-consumer plastic bottles" },
 ]
 const COLORS = ["Natural (Beige)", "White", "Black", "Green", "Custom"]
 const colorDots = { "Natural (Beige)": "#e8dcc8", White: "#f3f4f6", Black: "#1f2937", Green: "#166534", Custom: "#a855f7" }
 const HANDLES  = ["Short Handle", "Long Handle", "Drawstring"]
 const METHODS  = [
-{ val: "Screen Printing", icon: "🖨️", desc: "Crisp flat colors — best for bold logos", badge: "+₱20" },
-{ val: "Heat Transfer",   icon: "🔥", desc: "Detailed, vibrant — photos welcome",       badge: "+₱25" },
-{ val: "Sublimation",     icon: "🌈", desc: "Full-color, fade-resistant, all-over",     badge: "+₱30" },
-{ val: "Embroidery",      icon: "🧵", desc: "Stitched raised look — premium finish",    badge: "+₱35" },
+{ val: "Screen Printing", icon: <FiPrinter className="text-lg" />, desc: "Crisp flat colors — best for bold logos", badge: "+₱20" },
+{ val: "Heat Transfer",   icon: <MdWhatshot className="text-lg" />, desc: "Detailed, vibrant — photos welcome",       badge: "+₱25" },
+{ val: "Sublimation",     icon: <MdOpacity className="text-lg" />, desc: "Full-color, fade-resistant, all-over",     badge: "+₱30" },
+{ val: "Embroidery",      icon: <MdGesture className="text-lg" />, desc: "Stitched raised look — premium finish",    badge: "+₱35" },
 ]
 const PLACEMENTS = ["Front", "Back", "Both Sides"]
 const FONTS      = ["Sans-serif", "Serif", "Script / Handwritten", "Bold Display", "Monospace"]
@@ -371,7 +376,7 @@ return (
     <div className="xl:col-span-2 flex flex-col gap-6">
 
     {/* Bag Details */}
-    <SectionCard title="Bag Details" icon="👜">
+    <SectionCard title="Bag Details" icon={<FiShoppingBag />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Bag Type" required>
@@ -423,7 +428,7 @@ return (
     </SectionCard>
 
     {/* Material & Color */}
-    <SectionCard title="Material & Color" icon="🌿">
+    <SectionCard title="Material & Color" icon={<MdLayers className="text-lg" />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Material">
@@ -484,7 +489,7 @@ return (
     </SectionCard>
 
     {/* Customization */}
-    <SectionCard title="Customization" icon="🎨">
+    <SectionCard title="Customization" icon={<MdPalette className="text-lg" />}>
         <div className="flex flex-col gap-5">
 
         {/* Print Method */}

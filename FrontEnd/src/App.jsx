@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from "react-router-dom"
 import { FiHome, FiShoppingBag, FiList, FiUser, FiLogIn } from "react-icons/fi" // Added Navigation Icons
 import ScrollToTop from "./ScrollToTop"
+import ShopDropdown from "./ShopDropdown"
 
 // Import your pages
 import Home from "./pages/Home" 
@@ -136,27 +137,35 @@ function Layout() {
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans font-light">
       
       {/* HEADER - Increased from h-32 to h-40 for a bigger "Hero" feel */}
-      <div className="h-40 py-6 sticky top-0 z-50 border-b-8 border-red-600 bg-white">
+      <div className="h-24 py-3 sticky top-0 z-50 border-b-4 border-red-600 bg-white">
         <div className="flex h-full items-center mx-10">
           <Link to="/" onClick={() => { window.__scrollToTop = true }}>
             {/* LOGO - Increased from h-20 to h-28 */}
-            <img src="/images/Logo.png" alt="Pick2Print Logo" className="w-auto h-28 transition-all duration-300" />
+            <img src="/images/Logo.png" alt="Pick2Print Logo" className="w-auto h-16 transition-all duration-300"/>
           </Link>
         </div>
       </div>
 
       {/* NAV BAR - Updated top offset to 160px to match the new h-40 header */}
-      <div className="flex justify-between items-center bg-gray-800 text-white shadow-lg sticky top-[160px] z-40 px-10 py-5">
+      <div className="flex justify-between items-center bg-gray-800 text-white shadow-lg sticky top-[96px] z-40 px-10 py-3">
         <ul className="flex space-x-12 font-black text-sm uppercase tracking-widest items-center">
           <li>
             <Link to="/" className="flex items-center gap-2 hover:text-red-400 transition-colors py-1">
               <FiHome className="text-lg" /> Home
             </Link>
           </li>
-          <li>
-            <Link to="/shop" className="flex items-center gap-2 hover:text-red-400 transition-colors py-1">
-              <FiShoppingBag className="text-lg" /> Shop
-            </Link>
+          <li className="relative group flex items-center h-full">
+
+            <div className="flex items-center gap-2 h-full cursor-pointer hover:text-red-400 transition-colors relative z-50">
+              <FiShoppingBag className="text-lg" />
+              <Link to="/shop">Shop</Link>
+            </div>
+            <div className="absolute left-[-20px] top-[calc(100%-30px)] w-[0px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40">
+              <div className="bg-gray-800 rounded-b-xl shadow-2xl p-6 pt-0">
+                <ShopDropdown />
+              </div>
+              
+            </div>
           </li>
           <li>
             <Link to="/orders" className="flex items-center gap-2 hover:text-red-400 transition-colors py-1">

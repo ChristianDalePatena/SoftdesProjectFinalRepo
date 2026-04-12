@@ -46,170 +46,33 @@ return (
 )
 }
 
-function RadioCard({ label, sublabel, badge, active, onClick, icon }) {
-return (
-<button
-    type="button"
-    onClick={onClick}
-    className={`flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all w-full ${
-    active ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
-    }`}
->
-    {icon && <span className="text-lg mt-0.5 shrink-0">{icon}</span>}
-    <div className={`mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 ${active ? "border-red-500 bg-red-500" : "border-gray-300"}`} />
-    <div className="flex-1 min-w-0">
-    <div className="flex items-center gap-2 flex-wrap">
-        <p className={`text-sm font-bold ${active ? "text-red-700" : "text-gray-700"}`}>{label}</p>
-        {badge && (
-        <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">{badge}</span>
-        )}
-    </div>
-    {sublabel && <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">{sublabel}</p>}
-    </div>
-</button>
-)
-}
-
-function CardToggle({ label, sublabel, icon, active, onClick, badge }) {
-return (
-<button
-    type="button"
-    onClick={onClick}
-    className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all w-full ${
-    active ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
-    }`}
->
-    <span className="text-2xl shrink-0">{icon}</span>
-    <div className="flex-1 min-w-0">
-    <div className="flex items-center gap-2 flex-wrap">
-        <p className={`text-sm font-bold ${active ? "text-red-700" : "text-gray-700"}`}>{label}</p>
-        {badge && <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">{badge}</span>}
-    </div>
-    {sublabel && <p className="text-[11px] text-gray-400 mt-0.5">{sublabel}</p>}
-    </div>
-    <div className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all ${active ? "bg-red-500 border-red-500" : "border-gray-300"}`}>
-    {active && <span className="text-white text-[10px] font-black">✓</span>}
-    </div>
-</button>
-)
-}
-
-// ── Mousepad live preview ──────────────────────────────────────────────────────
-function MousepadPreview({ size, shape, surface, thickness, stitched, waterproof }) {
-const shapeStyle = {
-Rectangle: { borderRadius: "8px", width: "80px", height: "60px" },
-Square:    { borderRadius: "8px", width: "68px", height: "68px" },
-Circle:    { borderRadius: "50%", width: "68px", height: "68px" },
-"Custom Die-Cut": { borderRadius: "30% 10% 25% 15%", width: "72px", height: "64px" },
-}[shape] || { borderRadius: "8px", width: "80px", height: "60px" }
-
-const surfaceColor = {
-"Cloth (smooth)":    "#4B5563",
-"Textured Fabric":   "#374151",
-"Hard Surface":      "#1F2937",
-}[surface] || "#4B5563"
-
-const sizeLabel = {
-"Small (8×7 in)":   "S",
-"Medium (10×8 in)": "M",
-"Large (12×10 in)": "L",
-"Extended (Desk)":  "XL",
-}[size] || "M"
-
-const thicknessPx = thickness === "3mm (standard)" ? 4 : thickness === "5mm (thick)" ? 7 : 10
-
-return (
-<div className="flex flex-col items-center gap-3">
-    <div className="relative w-full h-36 rounded-xl border border-gray-200 bg-linear-to-br from-gray-100 to-gray-50 flex items-center justify-center overflow-hidden">
-    {/* Desk surface hint */}
-    <div className="absolute inset-0 opacity-10"
-        style={{ backgroundImage: "linear-gradient(45deg, #ccc 1px, transparent 1px), linear-gradient(-45deg, #ccc 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-
-    {/* Mousepad body */}
-    <div className="relative flex flex-col items-center gap-1.5">
-        {/* Shadow */}
-        <div style={{ ...shapeStyle, background: "rgba(0,0,0,0.15)", transform: "translate(4px,4px)", position: "absolute", top: 0, left: 0 }} />
-
-        {/* Pad surface */}
-        <div
-        className="relative flex items-center justify-center"
-        style={{ ...shapeStyle, background: surfaceColor, boxShadow: stitched ? `0 0 0 3px #EF4444, 0 0 0 5px ${surfaceColor}` : "none" }}
-        >
-        {/* Design area */}
-        <div className="flex flex-col items-center gap-1 opacity-40">
-            <div className="w-6 h-1 bg-red-400 rounded-full" />
-            <div className="w-4 h-0.5 bg-gray-300 rounded-full" />
-            <div className="text-white text-[8px] font-black">{sizeLabel}</div>
-        </div>
-        {/* Waterproof badge */}
-        {waterproof && (
-            <div className="absolute top-1 right-1 w-3 h-3 bg-blue-400 rounded-full flex items-center justify-center">
-            <span className="text-white text-[6px]">💧</span>
-            </div>
-        )}
-        </div>
-
-        {/* Thickness bar */}
-        <div className="flex items-center gap-1 mt-1">
-        <div className="rounded-sm bg-gray-400" style={{ width: shapeStyle.width, height: `${thicknessPx}px` }} />
-        </div>
-    </div>
-
-    {/* Labels */}
-    <div className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm rounded-lg px-2 py-1 shadow text-[9px] font-bold text-gray-500 border border-gray-100">
-        {shape} · {thickness.split(" ")[0]}
-    </div>
-    </div>
-    <p className="text-[10px] text-gray-400 italic">Live preview (approximate)</p>
-</div>
-)
-}
-
 // ── Pricing ────────────────────────────────────────────────────────────────────
 const SIZE_BASE = {
 "Small (8×7 in)":   150,
-"Medium (10×8 in)": 200,
-"Large (12×10 in)": 300,
-"Extended (Desk)":  500,
 }
 
-function computePrice({ size, thickness, stitched, waterproof, shape, qty }) {
-let unit = SIZE_BASE[size] ?? 200
-if (thickness === "5mm (thick)")       unit += 50
-if (thickness === "8mm (extra thick)") unit += 100
-if (stitched)    unit += 30
-if (waterproof)  unit += 20
-if (shape === "Custom Die-Cut") unit += 50
+function computePrice({ size, thickness, qty }) {
+let unit = SIZE_BASE[size] ?? 150
+if (thickness === "5mm (thick)")       unit += 30
 return { unitPrice: unit, total: unit * qty }
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function MousePadOrderForm() {
 // A. Details
-const [size, setSize]   = useState("Medium (10×8 in)")
+const [size, setSize]   = useState("Small (8×7 in)")
 const [qty, setQty]     = useState(1)
 
-// B. Material
-const [surface, setSurface]   = useState("Cloth (smooth)")
-const [baseType, setBaseType] = useState("Rubber Base")
-
-// C. Thickness
+// B. Thickness
 const [thickness, setThickness] = useState("3mm (standard)")
 
-// D. Shape
-const [shape, setShape] = useState("Rectangle")
-
-// E. Edge & Finish
-const [stitched, setStitched]     = useState(false)
-const [waterproof, setWaterproof] = useState(false)
-
-// F. Design
+// C. Design
 const [file, setFile]                 = useState(null)
 const [needsDesign, setNeedsDesign]   = useState(false)
 const [instructions, setInstructions] = useState("")
 const fileRef = useRef()
 
-// G. Delivery
+// D. Delivery
 const [delivery, setDelivery] = useState("Pickup")
 const [address, setAddress]   = useState("")
 
@@ -226,40 +89,24 @@ return Object.keys(e).length === 0
 
 const handleSubmit = () => {
 if (!validate()) return
-alert(`✅ Order submitted!\n\nMousepad – ${size}\nSurface: ${surface}\nShape: ${shape}\nThickness: ${thickness}\nQty: ${qty}\nTotal: ₱${total.toLocaleString()}`)
+alert(`✅ Order submitted!\n\nMousepad – ${size}\nThickness: ${thickness}\nQty: ${qty}\nTotal: ₱${total.toLocaleString()}`)
 }
 
-const { unitPrice, total } = computePrice({ size, thickness, stitched, waterproof, shape, qty })
+const { unitPrice, total } = computePrice({ size, thickness, qty })
 
 const summaryRows = [
 { label: "Size",      value: size },
 { label: "Quantity",  value: `${qty} pc${qty > 1 ? "s" : ""}` },
-{ label: "Surface",   value: surface },
-{ label: "Base",      value: baseType },
 { label: "Thickness", value: thickness },
-{ label: "Shape",     value: shape },
-{ label: "Edges",     value: stitched ? "Stitched" : "Standard Cut" },
-{ label: "Waterproof",value: waterproof ? "Yes (+₱20)" : "No" },
 ]
 
 const SIZE_OPTIONS = [
 { val: "Small (8×7 in)",   icon: "🟫", desc: "Compact — ideal for tight desks and gaming peripherals" },
-{ val: "Medium (10×8 in)", icon: "🟧", desc: "Standard — most popular size for everyday use" },
-{ val: "Large (12×10 in)", icon: "🟥", desc: "Large — great for wide monitors and creative setups" },
-{ val: "Extended (Desk)",  icon: "🗂️", desc: "Full desk coverage — keyboard + mouse on one pad" },
 ]
 
 const THICKNESS_OPTIONS = [
 { val: "3mm (standard)",    bar: "w-1/3", desc: "Slim profile — standard gaming and office use" },
-{ val: "5mm (thick)",       bar: "w-2/3", desc: "+₱50 — extra cushion, ergonomic comfort",    badge: "+₱50" },
-{ val: "8mm (extra thick)", bar: "w-full", desc: "+₱100 — maximum padding, premium feel",     badge: "+₱100" },
-]
-
-const SHAPE_OPTIONS = [
-{ val: "Rectangle",       icon: "▬",  desc: "Classic landscape orientation" },
-{ val: "Square",          icon: "⬛",  desc: "Symmetrical — great for portrait layouts" },
-{ val: "Circle",          icon: "⭕",  desc: "Unique, eye-catching desk accent" },
-{ val: "Custom Die-Cut",  icon: "✦",  desc: "Any shape — logo, character, or custom outline",  badge: "+₱50" },
+{ val: "5mm (thick)",       bar: "w-2/3", desc: "+₱30 — extra cushion, ergonomic comfort",    badge: "+₱30" },
 ]
 
 return (
@@ -320,59 +167,6 @@ return (
         </div>
     </SectionCard>
 
-    {/* Material & Surface */}
-    <SectionCard title="Material & Surface" icon="🧵">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        <Field label="Surface Type" hint="Affects print texture and mouse glide">
-            <div className="flex flex-col gap-2">
-            {[
-                { val: "Cloth (smooth)",   icon: "🟤", desc: "Soft woven surface — precise tracking, comfortable wrist feel" },
-                { val: "Textured Fabric",  icon: "🔶", desc: "Micro-texture weave — increased friction for controlled movements" },
-                { val: "Hard Surface",     icon: "⬛", desc: "Rigid acrylic/plastic top — fast glide, ultra-precise tracking" },
-            ].map(({ val, icon, desc }) => (
-                <button
-                key={val} type="button" onClick={() => setSurface(val)}
-                className={`flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
-                    surface === val ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
-                }`}
-                >
-                <span className="text-lg mt-0.5 shrink-0">{icon}</span>
-                <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold ${surface === val ? "text-red-700" : "text-gray-700"}`}>{val}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{desc}</p>
-                </div>
-                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 ${surface === val ? "border-red-500 bg-red-500" : "border-gray-300"}`} />
-                </button>
-            ))}
-            </div>
-        </Field>
-
-        <Field label="Base Type" hint="Bottom layer grip and stability">
-            <div className="flex flex-col gap-2">
-            {[
-                { val: "Rubber Base",    icon: "⚫", desc: "Natural rubber — strong grip on most surfaces, prevents sliding" },
-                { val: "Anti-slip Base", icon: "🔒", desc: "Premium grip coating — superior non-slip even on glass desks" },
-            ].map(({ val, icon, desc }) => (
-                <button
-                key={val} type="button" onClick={() => setBaseType(val)}
-                className={`flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
-                    baseType === val ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
-                }`}
-                >
-                <span className="text-lg mt-0.5 shrink-0">{icon}</span>
-                <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold ${baseType === val ? "text-red-700" : "text-gray-700"}`}>{val}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{desc}</p>
-                </div>
-                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 ${baseType === val ? "border-red-500 bg-red-500" : "border-gray-300"}`} />
-                </button>
-            ))}
-            </div>
-        </Field>
-        </div>
-    </SectionCard>
-
     {/* Thickness */}
     <SectionCard title="Thickness" icon="📏">
         <Field label="Pad Thickness" hint="Thicker pads offer more cushioning and a premium feel">
@@ -403,79 +197,6 @@ return (
             ))}
         </div>
         </Field>
-    </SectionCard>
-
-    {/* Shape Options */}
-    <SectionCard title="Shape" icon="🔷">
-        <div className="flex flex-col gap-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {SHAPE_OPTIONS.map(({ val, icon, desc, badge }) => (
-            <button
-                key={val} type="button" onClick={() => setShape(val)}
-                className={`flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
-                shape === val ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
-                }`}
-            >
-                <span className="text-2xl shrink-0 mt-0.5">{icon}</span>
-                <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                    <p className={`text-sm font-bold ${shape === val ? "text-red-700" : "text-gray-700"}`}>{val}</p>
-                    {badge && <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">{badge}</span>}
-                </div>
-                <p className="text-[11px] text-gray-400 mt-0.5">{desc}</p>
-                </div>
-                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 ${shape === val ? "border-red-500 bg-red-500" : "border-gray-300"}`} />
-            </button>
-            ))}
-        </div>
-        {shape === "Custom Die-Cut" && (
-            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <span className="shrink-0">✂️</span>
-            <p>Custom Die-Cut requires a vector outline file (AI, EPS, or SVG). Upload your shape guide in the Design section below, or request design assistance.</p>
-            </div>
-        )}
-        </div>
-    </SectionCard>
-
-    {/* Edge & Finish */}
-    <SectionCard title="Edge & Finish" icon="💎">
-        <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <CardToggle
-            label="Stitched Edges"
-            sublabel="+₱30/pc — reinforced border stitching for durability and a premium, professional finish"
-            icon="🧵"
-            badge="+₱30"
-            active={stitched}
-            onClick={() => setStitched(!stitched)}
-            />
-            <CardToggle
-            label="Waterproof Coating"
-            sublabel="+₱20/pc — protective layer that repels spills and moisture damage"
-            icon="💧"
-            badge="+₱20"
-            active={waterproof}
-            onClick={() => setWaterproof(!waterproof)}
-            />
-        </div>
-
-        <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
-            <span className="shrink-0">ℹ️</span>
-            <p>Stitched edges extend the lifespan of your mousepad by preventing fraying and delamination at the borders — recommended for long-term daily use.</p>
-        </div>
-        </div>
-    </SectionCard>
-
-    {/* Live Preview */}
-    <SectionCard title="Preview" icon="👁️">
-        <MousepadPreview
-        size={size}
-        shape={shape}
-        surface={surface}
-        thickness={thickness}
-        stitched={stitched}
-        waterproof={waterproof}
-        />
     </SectionCard>
 
     {/* Design */}
@@ -609,19 +330,7 @@ return (
             <span>₱{SIZE_BASE[size].toLocaleString()}/pc</span>
             </div>
             {thickness === "5mm (thick)" && (
-            <div className="flex justify-between text-xs text-gray-500"><span>5mm Thickness</span><span>+₱50/pc</span></div>
-            )}
-            {thickness === "8mm (extra thick)" && (
-            <div className="flex justify-between text-xs text-gray-500"><span>8mm Thickness</span><span>+₱100/pc</span></div>
-            )}
-            {stitched && (
-            <div className="flex justify-between text-xs text-gray-500"><span>Stitched Edges</span><span>+₱30/pc</span></div>
-            )}
-            {waterproof && (
-            <div className="flex justify-between text-xs text-gray-500"><span>Waterproof Coating</span><span>+₱20/pc</span></div>
-            )}
-            {shape === "Custom Die-Cut" && (
-            <div className="flex justify-between text-xs text-gray-500"><span>Custom Die-Cut Shape</span><span>+₱50/pc</span></div>
+            <div className="flex justify-between text-xs text-gray-500"><span>5mm Thickness</span><span>+₱30/pc</span></div>
             )}
             <div className="flex justify-between text-sm font-bold text-gray-700 border-t border-gray-100 pt-2 mt-1">
             <span>Price per piece</span>
