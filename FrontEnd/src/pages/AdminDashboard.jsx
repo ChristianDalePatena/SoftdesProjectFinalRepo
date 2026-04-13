@@ -1,6 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPieChart, FiBox, FiUsers, FiSettings, FiLogOut, FiRefreshCw, FiDownload } from 'react-icons/fi';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 // --- REALISTIC INITIAL DATA ---
 const initialOrders = [
@@ -33,6 +56,22 @@ const trendData = [
   { label: 'Sat', value: 45 },
   { label: 'Sun', value: 32 },
 ];
+
+const generateRevenueTrend = () => {
+  const today = new Date();
+
+  return Array.from({ length: 30 }, (_, i) => {
+    const date = new Date();
+    date.setDate(today.getDate() - (29 - i));
+
+    return {
+      day: date.getDate(), // day of month
+      value: Math.floor(Math.random() * 9000) + 1000,
+    };
+  });
+};
+
+const revenueTrend = generateRevenueTrend();
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -197,7 +236,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Most Requested Services - Taller (h-[480px]) */}
+              {/* Most Requested Services */}
               <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[480px]">
                 <h3 className="text-xl font-bold text-gray-900 mb-8">Top Services</h3>
                 <div className="space-y-8 flex-1 flex flex-col justify-center">
@@ -208,16 +247,71 @@ export default function AdminDashboard() {
                         <span className="font-black text-gray-900">{service.percentage}%</span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-2">
-                        <div className="bg-red-600 h-2 rounded-full" style={{ width: `${service.percentage}%` }}></div>
+                        <div
+                          className="bg-red-600 h-2 rounded-full"
+                          style={{ width: `${service.percentage}%` }}
+                        ></div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-            </div>
-          </div>
-        )}
+              </div>
+              {/* Revenue Trend (This Month) */}
+<div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 mt-8">
+  <h3 className="text-xl font-bold text-gray-900 mb-6">
+    Revenue Trend (This Month)
+  </h3>
+
+  <div className="h-[300px]">
+    <Line
+      data={{
+        labels: revenueTrend.map((d) => d.day),
+
+        datasets: [
+          {
+            label: "Revenue",
+            data: revenueTrend.map((d) => d.value),
+
+            borderColor: "#dc2626",
+            backgroundColor: "rgba(220, 38, 38, 0.15)",
+            fill: true,
+
+            tension: 0.4,
+            pointRadius: 3,
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+          legend: { display: false },
+        },
+
+        scales: {
+          x: {
+            grid: { display: false },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value) => `₱${value / 1000}k`,
+            },
+          },
+        },
+      }}
+    />
+  </div>
+</div>
+
+{/* CLOSE OVERVIEW TAB */}
+</div>
+)} 
+
+        
 
         {/* --- TAB: ORDERS --- */}
         {activeTab === 'orders' && !selectedOrder && (

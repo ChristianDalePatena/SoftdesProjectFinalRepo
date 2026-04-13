@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
-import { FiShoppingBag, FiPrinter} from "react-icons/fi";
+import { FiShoppingBag, FiPrinter, FiTruck} from "react-icons/fi";
 import { FaCottonBureau } from "react-icons/fa6";
 import { IoBagOutline } from "react-icons/io5";
-import { MdTexture, MdPolymer, MdLayers, MdPalette, MdWhatshot, MdOpacity, MdGesture} from "react-icons/md"
+import { MdTexture, MdPolymer, MdLayers, MdPalette, MdWhatshot, MdOpacity, MdGesture} from "react-icons/md";
+import { DeliverySection } from "../../shared"
+
 
 
 // ── Primitives ─────────────────────────────────────────────────────────────────
@@ -223,12 +225,6 @@ return (
         <text x={bx + bw - 11} y={by + 14} textAnchor="middle" fontSize={6} fontWeight="bold" fill="white">F+B</text>
         </g>
     )}
-    {printPlacement === "Back" && (
-        <g>
-        <rect x={bx + bw - 20} y={by + 6} width={18} height={10} rx={3} fill="#6b7280" opacity={0.85} />
-        <text x={bx + bw - 11} y={by + 14} textAnchor="middle" fontSize={6} fontWeight="bold" fill="white">BCK</text>
-        </g>
-    )}
 
     {/* Embroidery texture hint */}
     {printMethod === "Embroidery" && (hasDesign || mainText) && (
@@ -255,7 +251,6 @@ if (printMethod === "Heat Transfer")    unit += 25
 if (printMethod === "Sublimation")      unit += 30
 if (printMethod === "Embroidery")       unit += 35
 if (printPlacement === "Both Sides")    unit += 15
-if (printPlacement === "Back")          unit += 15
 if (innerPocket)      unit += 15
 if (zipper)           unit += 20
 if (gusset)           unit += 15
@@ -343,7 +338,7 @@ const METHODS  = [
 { val: "Sublimation",     icon: <MdOpacity className="text-lg" />, desc: "Full-color, fade-resistant, all-over",     badge: "+₱30" },
 { val: "Embroidery",      icon: <MdGesture className="text-lg" />, desc: "Stitched raised look — premium finish",    badge: "+₱35" },
 ]
-const PLACEMENTS = ["Front", "Back", "Both Sides"]
+const PLACEMENTS = ["Front", "Both Sides"]
 const FONTS      = ["Sans-serif", "Serif", "Script / Handwritten", "Bold Display", "Monospace"]
 
 const activeAddOns = [
@@ -506,7 +501,7 @@ return (
         <Field label="Design Mode">
             <div className="flex gap-3">
             <ToggleBtn active={designMode === "upload"} onClick={() => setDesignMode("upload")}>
-                📁 Upload File
+                Upload File
             </ToggleBtn>
             <ToggleBtn active={designMode === "text"} onClick={() => setDesignMode("text")}>
                 ✏️ Text-Based
@@ -656,35 +651,9 @@ return (
     </SectionCard>
 
     {/* Delivery */}
-    <SectionCard title="Delivery" icon="🚚">
-        <div className="flex flex-col gap-4">
-        <Field label="Fulfillment Method">
-            <div className="flex gap-3">
-            <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
-                🏪 Pickup
-            </ToggleBtn>
-            <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
-                📦 Delivery
-            </ToggleBtn>
-            </div>
-        </Field>
-        {delivery === "Pickup" && (
-            <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span>📍</span>
-            <p>You'll receive an SMS when your order is ready for pickup at our store.</p>
-            </div>
-        )}
-        {delivery === "Delivery" && (
-            <Field label="Delivery Address" hint="Include barangay, city, and province" required>
-            <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2}
-                placeholder="e.g. 45 Rizal Ave., Brgy. Poblacion, Makati City, Metro Manila"
-                className={inputCls + " resize-none" + (errors.address ? " border-red-400 ring-1 ring-red-300" : "")} />
-            {errors.address && <p className="text-[11px] text-red-500 mt-1">{errors.address}</p>}
-            </Field>
-        )}
-        </div>
-    </SectionCard>
-
+    <SectionCard title="Delivery Info" icon={<FiTruck />}>
+            <DeliverySection delivery={delivery} setDelivery={setDelivery} address={address} setAddress={setAddress} />
+        </SectionCard>
     </div>
 
     {/* ── RIGHT: Sidebar ──────────────────────────────── */}
