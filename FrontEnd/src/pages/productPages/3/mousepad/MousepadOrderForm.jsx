@@ -1,4 +1,6 @@
-import { useState, useRef } from "react"
+import { useState, useRef } from "react";
+import {DeliverySection} from "../../shared";
+import { FiTruck } from "react-icons/fi";
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 const inputCls =
@@ -80,11 +82,18 @@ const [address, setAddress]   = useState("")
 const [errors, setErrors] = useState({})
 
 const validate = () => {
-const e = {}
-if (!qty || qty < 1) e.qty = "Minimum quantity is 1"
-if (delivery === "Delivery" && !address.trim()) e.address = "Please enter a delivery address"
-setErrors(e)
-return Object.keys(e).length === 0
+  const e = {}
+
+  if (!qty || qty < 1) {
+    e.qty = "Minimum quantity is 1"
+  }
+
+  if (delivery === "Delivery" && !address.trim()) {
+    e.address = "Please enter a delivery address"
+  }
+
+  setErrors(e)
+  return Object.keys(e).length === 0
 }
 
 const handleSubmit = () => {
@@ -273,32 +282,10 @@ return (
     </SectionCard>
 
     {/* Delivery */}
-    <SectionCard title="Delivery Info" icon="🚚">
-        <div className="flex flex-col gap-5">
-        <Field label="Fulfillment Method">
-            <div className="flex gap-3">
-            <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>🏪 Pickup</ToggleBtn>
-            <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>📦 Delivery</ToggleBtn>
-            </div>
-        </Field>
-        {delivery === "Pickup" && (
-            <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span>📍</span>
-            <p>Ready for pickup at our store. You'll receive an SMS when your order is ready.</p>
-            </div>
-        )}
-        {delivery === "Delivery" && (
-            <Field label="Delivery Address" hint="Include barangay, city, and province" required>
-            <textarea
-                value={address} onChange={(e) => setAddress(e.target.value)} rows={2}
-                placeholder="e.g. 45 Rizal Ave., Brgy. Poblacion, Makati City, Metro Manila"
-                className={inputCls + " resize-none" + (errors.address ? " border-red-400 ring-1 ring-red-300" : "")}
-            />
-            {errors.address && <p className="text-[11px] text-red-500 mt-0.5">{errors.address}</p>}
-            </Field>
-        )}
-        </div>
+    <SectionCard title="Delivery Info" icon={<FiTruck />}>
+        <DeliverySection delivery={delivery} setDelivery={setDelivery} address={address} setAddress={setAddress} />
     </SectionCard>
+    
 
     </div>
 

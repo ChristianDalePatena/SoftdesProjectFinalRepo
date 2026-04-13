@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
-import { FiShoppingBag, FiPrinter, FiTruck} from "react-icons/fi";
-import { FaCottonBureau } from "react-icons/fa6";
+import { FiShoppingBag, FiPrinter, FiTruck, FiType, FiCheckCircle, FiImage, FiPackage, FiShoppingCart, FiStar} from "react-icons/fi";
+import { FaCottonBureau, FaGetPocket, FaFileZipper, FaTag, FaDroplet} from "react-icons/fa6";
 import { IoBagOutline } from "react-icons/io5";
-import { MdTexture, MdPolymer, MdLayers, MdPalette, MdWhatshot, MdOpacity, MdGesture} from "react-icons/md";
+import { MdTexture, MdPolymer, MdLayers, MdPalette, MdWhatshot, MdOpacity, MdGesture, MdFileUpload, MdInfo} from "react-icons/md";
+import { LucidePanelTop } from "lucide-react";
 import { DeliverySection } from "../../shared"
 
 
@@ -501,10 +502,12 @@ return (
         <Field label="Design Mode">
             <div className="flex gap-3">
             <ToggleBtn active={designMode === "upload"} onClick={() => setDesignMode("upload")}>
+            <MdFileUpload className="inline mr-2" />
                 Upload File
             </ToggleBtn>
             <ToggleBtn active={designMode === "text"} onClick={() => setDesignMode("text")}>
-                ✏️ Text-Based
+            <FiType className="inline mr-2" />
+                Text-Based
             </ToggleBtn>
             </div>
         </Field>
@@ -518,7 +521,7 @@ return (
                 errors.design ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
                 }`}
             >
-                <span className="text-4xl group-hover:scale-110 transition-transform">{designFile ? "✅" : "🖼️"}</span>
+                <span className="text-4xl group-hover:scale-110 transition-transform">{designFile ? <FiCheckCircle /> : <FiImage />}</span>
                 {designFile ? (
                 <p className="text-xs text-center text-green-700 font-semibold break-all">{designFile.name}</p>
                 ) : (
@@ -581,13 +584,13 @@ return (
     </SectionCard>
 
     {/* Bulk Order */}
-    <SectionCard title="Bulk Order" icon="📦">
+    <SectionCard title="Bulk Order" icon={<FiPackage />}>
         <div className="flex flex-col gap-4">
 
         <AddOnToggle
             label="Enable Bulk Order Mode"
             sublabel="Personalize each bag with different names or text via CSV/Excel upload"
-            icon="📊"
+            icon={<FiShoppingCart />}
             priceLabel={bulkOrder ? "Active" : "Off"}
             checked={bulkOrder}
             onChange={() => { setBulkOrder(!bulkOrder); setCsvFile(null) }}
@@ -626,7 +629,7 @@ return (
 
         {!bulkOrder && (
             <div className="flex items-start gap-3 bg-gray-50 border border-gray-100 rounded-xl p-3 text-xs text-gray-500">
-            <span>ℹ️</span>
+            {<MdInfo/>}
             <p>Single design only — all bags will have the same print. Enable bulk mode for personalized variations per bag.</p>
             </div>
         )}
@@ -635,18 +638,18 @@ return (
     </SectionCard>
 
     {/* Add-ons */}
-    <SectionCard title="Add-ons" icon="⭐">
+    <SectionCard title="Add-ons" icon={<FiStar/>}>
         <div className="flex flex-col gap-3">
         <AddOnToggle label="Inner Pocket" sublabel="Zippered inner compartment for valuables"
-            icon="🗂️" priceLabel="+₱15" checked={innerPocket} onChange={() => setInnerPocket(!innerPocket)} />
+            icon={<FaGetPocket/>} priceLabel="+₱15" checked={innerPocket} onChange={() => setInnerPocket(!innerPocket)} />
         <AddOnToggle label="Zipper Closure" sublabel="Keeps contents secure — adds a zipper at the top opening"
-            icon="🤐" priceLabel="+₱20" checked={zipper} onChange={() => setZipper(!zipper)} />
+            icon={<FaFileZipper/>} priceLabel="+₱20" checked={zipper} onChange={() => setZipper(!zipper)} />
         <AddOnToggle label="Gusset (Expanded Bottom)" sublabel="Wider base for more volume and stability"
-            icon="📐" priceLabel="+₱15" checked={gusset} onChange={() => setGusset(!gusset)} />
+            icon={<LucidePanelTop/>} priceLabel="+₱15" checked={gusset} onChange={() => setGusset(!gusset)} />
         <AddOnToggle label="Custom Tag / Label" sublabel="Sewn-in branded tag with logo or care instructions"
-            icon="🏷️" priceLabel="+₱10" checked={customTag} onChange={() => setCustomTag(!customTag)} />
+           icon={<FaTag/>} priceLabel="+₱10" checked={customTag} onChange={() => setCustomTag(!customTag)} />
         <AddOnToggle label="Waterproof Lining" sublabel="Inner laminated coating to protect bag contents"
-            icon="💧" priceLabel="+₱25" checked={waterproofLining} onChange={() => setWaterproofLining(!waterproofLining)} />
+           icon={<FaDroplet/>} priceLabel="+₱25" checked={waterproofLining} onChange={() => setWaterproofLining(!waterproofLining)} />
         </div>
     </SectionCard>
 
@@ -663,7 +666,6 @@ return (
         {/* Live Preview */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-linear-to-r from-gray-50 to-white">
-            <span className="text-xl">👜</span>
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-600">Live Preview</h2>
         </div>
         <div className="px-6 py-6 flex justify-center bg-gray-50 min-h-55 items-center">
@@ -719,15 +721,28 @@ return (
         </div>
 
         {/* Help Card */}
-        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5">
-        <p className="text-xs font-black uppercase tracking-widest text-yellow-700 mb-2">Need Help?</p>
-        <p className="text-xs text-yellow-700 leading-relaxed">
-            Not sure which material or print method fits your brand? Message us on Facebook or email{" "}
-            <a href="mailto:picktwoprint@gmail.com" className="underline font-semibold">
-            picktwoprint@gmail.com
-            </a>
-        </p>
-        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">💬</span>
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed mb-3">
+                Not sure about the materials or artwork setup? We're happy to help you spec the perfect order.
+            </p>
+            <div className="flex flex-col gap-2">
+                <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                📞 0947-463-1561
+                </a>
+                <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+                className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                💬 Chat on Messenger
+                </a>
+                <a href="mailto:picktwoprint@gmail.com"
+                className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                ✉️ picktwoprint@gmail.com
+                </a>
+            </div>
+            </div>
 
     </div>
     </div>

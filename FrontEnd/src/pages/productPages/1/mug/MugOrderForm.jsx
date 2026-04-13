@@ -201,7 +201,28 @@ return (
     <div className="xl:col-span-1">
     <div className="sticky top-36 flex flex-col gap-4">
         <SummaryCard rows={summaryRows} total={totalPrice} onSubmit={handleSubmit} />
-        <HelpCard />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">💬</span>
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed mb-3">
+                Not sure about the materials or artwork setup? We're happy to help you spec the perfect order.
+            </p>
+            <div className="flex flex-col gap-2">
+                <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                📞 0947-463-1561
+                </a>
+                <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+                className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                💬 Chat on Messenger
+                </a>
+                <a href="mailto:picktwoprint@gmail.com"
+                className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+                ✉️ picktwoprint@gmail.com
+                </a>
+            </div>
+            </div>
     </div>
     </div>
 </div>
