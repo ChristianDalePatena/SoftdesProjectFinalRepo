@@ -34,12 +34,14 @@ class OrderListSerializer(serializers.ModelSerializer):
     items    = OrderItemSerializer(many=True, read_only=True)
     can_edit = serializers.BooleanField(read_only=True)
     date     = serializers.DateTimeField(source="created_at", read_only=True)
+    files    = OrderFileSerializer(many=True, read_only=True)
 
     class Meta:
         model  = Order
         fields = [
             "id", "order_code", "date", "status",
             "delivery_type", "total_price", "items", "can_edit",
+            "files"
         ]
 
 

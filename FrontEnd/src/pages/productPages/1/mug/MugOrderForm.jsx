@@ -1,4 +1,5 @@
 import { useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { 
   FiCoffee, FiImage, FiEdit3, FiPackage, FiTruck, 
   FiUploadCloud, FiCheckCircle, FiInfo, FiLayout
@@ -40,9 +41,88 @@ const magicExtra  = mugType === "Magic Mug (Heat-sensitive)" ? 50 : 0
 const boxExtra    = withBox ? 20 : 0
 const pricePerUnit = basePrice + magicExtra + boxExtra
 const totalPrice  = qty * pricePerUnit
+const navigate = useNavigate();
+const handleSubmit = async () => {
+    // 1. Basic Validation
+    if (delivery === "Delivery" && !address.trim()) {
+        alert("Please provide a delivery address.");
+        return;
+    }
 
-const handleSubmit = () =>
-alert(`Order submitted!\n\n${mugType}\nQty: ${qty}\nTotal: ₱${totalPrice.toLocaleString()}`)
+    // 2. Package the data using FormData
+    const formData = new FormData();
+    
+    // Top-level order fields
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    
+    if (delivery === "Delivery") {
+        formData.append("address", address); // Serializer expects 'address', not 'delivery_address'
+    }
+
+    // Combine custom options into notes
+    const orderDetails = `
+      Mug Type: ${mugType}
+      Print Area: ${printArea}
+      Design Size: ${designSize}
+      Orientation: ${orientation}
+      Custom Text: ${customText} (Font: ${fontStyle}, Color: ${textColor})
+      Box Packaging: ${withBox ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // THE FIX: Build the 'items' array that Django is asking for!
+    // We send it as a JSON string so it survives the FormData transfer.
+    const cartItems = [
+        {
+            // SWAP THIS STRING WITH THE EXACT SLUG FROM YOUR DJANGO ADMIN:
+            service_slug: "mug", 
+            quantity: qty,
+            price_per_unit: pricePerUnit,
+            options: {
+                mug_type: mugType,
+                print_area: printArea
+            }
+        }
+    ];
+    formData.append("items", JSON.stringify(cartItems));
+
+    // Safely attach the uploaded file
+    if (file && file.length > 0) {
+        formData.append("design_file", file[0]); 
+    }
+
+    // 3. Send to Django
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert("Please log-in or create an account to place an order.");
+        navigate("/signin");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ Order submitted successfully!");
+            navigate("/account"); 
+        } else {
+            const errorData = await response.json();
+            console.error("Django rejected the order:", errorData);
+            alert(`Order Failed: ${JSON.stringify(errorData)}`);
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Network error. Is your Django server running?");
+    }
+  }
 
 const summaryRows = [
 { label: "Product",       value: mugType },

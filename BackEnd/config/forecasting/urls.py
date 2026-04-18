@@ -1,2 +1,6 @@
 from django.urls import path
-urlpatterns = []
+from . import views
+
+urlpatterns = [
+    path('weekly/', views.WeeklyForecastView.as_view(), name='weekly-forecast'),
+]

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPieChart, FiBox, FiUsers, FiSettings, FiLogOut, FiRefreshCw, FiDownload } from 'react-icons/fi';
 import {
@@ -75,10 +75,21 @@ const revenueTrend = generateRevenueTrend();
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [orders, setOrders] = useState(initialOrders);
-  const [customers, setCustomers] = useState(mockCustomers);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Live Backend Data States
+  const [stats, setStats] = useState({
+    dailyRevenue: 0,
+    weeklyRevenue: 0,
+    monthlyRevenue: 0,
+    trendData: [],
+    topServices: [],
+    revenueTrend: []
+  });
+  const [forecastData, setForecastData] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [noteInput, setNoteInput] = useState("");
 
   const [settings, setSettings] = useState({
@@ -89,39 +100,196 @@ export default function AdminDashboard() {
     smsNotifications: false
   });
 
-  // --- HANDLERS ---
-  const fetchDashboardData = () => {
+
+
+  const fetchDashboardData = async () => {
     setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 800);
+    
+    // Grab the token from storage!
+    const token = localStorage.getItem('access_token'); 
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}` // This proves to Django you are an Admin
+    };
+
+    try {
+      // 1. Fetch Overview Stats
+      const statsRes = await fetch('http://127.0.0.1:8000/api/admin/dashboard/stats/', { headers });
+      if (statsRes.ok) {
+        const statsJson = await statsRes.json();
+        setStats(statsJson);
+      } else {
+        console.error("Failed to fetch stats");
+      }
+
+      // 2. Fetch SARIMAX Forecast
+      const forecastRes = await fetch('http://127.0.0.1:8000/api/forecast/weekly/', { headers });
+      if (forecastRes.ok) {
+        const forecastJson = await forecastRes.json();
+        setForecastData(forecastJson.forecast);
+      } else {
+        console.error("Failed to fetch forecast");
+      }
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const handleUpdateStatus = (orderId, newStatus) => {
+  const fetchOrders = async () => {
+    const token = localStorage.getItem('access_token'); 
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/admin/orders/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/admin/customers/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCustomers(data);
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const fetchSettings = async () => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/admin/settings/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+    }
+  };
+
+  // Run this once when the dashboard loads
+  useEffect(() => {
+    fetchDashboardData();
+    fetchOrders();
+    fetchCustomers();
+    fetchSettings();
+  }, []);
+
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    // 1. Instantly update the React UI (Optimistic Update)
     setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder({ ...selectedOrder, status: newStatus });
     }
+
+    // 2. Send the update to Django
+    const token = localStorage.getItem('access_token');
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/admin/orders/${orderId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        // THE FIX: Django needs lowercase statuses!
+        body: JSON.stringify({ status: newStatus.toLowerCase() }) 
+      });
+
+      // THE SAFETY NET: If Django hates the request, tell us why!
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Django rejected the status update:", errorData);
+        alert(`Backend Error: ${JSON.stringify(errorData)}`);
+      }
+    } catch (error) {
+      console.error("Network error updating status:", error);
+    }
   };
 
-  const handleSaveNotes = (orderId) => {
+  const handleSaveNotes = async (orderId) => {
+    // 1. Instantly update the React UI
     setOrders(orders.map(o => o.id === orderId ? { ...o, notes: noteInput } : o));
+
+    // 2. Send the note to Django
+    const token = localStorage.getItem('access_token');
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/admin/orders/${orderId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ notes: noteInput }) 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Django rejected the note update:", errorData);
+        alert(`Backend Error: ${JSON.stringify(errorData)}`);
+      }
+    } catch (error) {
+      console.error("Network error saving notes:", error);
+    }
   };
 
-  const handleSaveSettings = (e) => {
+  const handleSaveSettings = async (e) => {
     e.preventDefault();
-    alert("Backend Trigger: Store settings saved successfully!");
+    const token = localStorage.getItem('access_token');
+    
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/admin/settings/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(settings)
+      });
+
+      if (response.ok) {
+        alert("Store settings saved successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to save settings: ${JSON.stringify(errorData)}`);
+      }
+    } catch (error) {
+      console.error("Network error saving settings:", error);
+      alert("Network error. Is Django running?");
+    }
   };
 
-  const maxTrendValue = Math.max(...trendData.map(d => d.value));
+  const maxTrendValue = Math.max(...stats.trendData.map(d => d.value), 1);
 
   // --- UI COMPONENTS ---
   const StatusBadge = ({ status }) => {
+    // 1. Force the incoming status to lowercase so it always matches
+    const normalizedStatus = status ? status.toLowerCase() : "pending";
+
+    // 2. Change these keys to lowercase
     const colors = {
-      Pending: "bg-red-50 text-red-600 border-red-100",
-      Processing: "bg-blue-50 text-blue-600 border-blue-100",
-      Completed: "bg-green-50 text-green-600 border-green-100"
+      pending: "bg-red-50 text-red-600 border-red-100",
+      processing: "bg-blue-50 text-blue-600 border-blue-100",
+      completed: "bg-green-50 text-green-600 border-green-100"
     };
+
     return (
-      <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${colors[status]}`}>
+      <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${colors[normalizedStatus] || "bg-gray-100 text-gray-500"}`}>
         {status}
       </span>
     );
@@ -202,15 +370,15 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-red-600">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Daily Revenue</p>
-                <h2 className="text-5xl font-black text-gray-900">₱4,250</h2>
+                <h2 className="text-5xl font-black text-gray-900">₱{stats.dailyRevenue.toLocaleString()}</h2>
               </div>
               <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-gray-800">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Weekly Revenue</p>
-                <h2 className="text-5xl font-black text-gray-900">₱28,400</h2>
+                <h2 className="text-5xl font-black text-gray-900">₱{stats.weeklyRevenue.toLocaleString()}</h2>
               </div>
               <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-gray-800">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Monthly Revenue</p>
-                <h2 className="text-5xl font-black text-gray-900">₱112,000</h2>
+                <h2 className="text-5xl font-black text-gray-900">₱{stats.monthlyRevenue.toLocaleString()}</h2>
               </div>
             </div>
 
@@ -221,7 +389,7 @@ export default function AdminDashboard() {
               <div className="bg-white p-10 rounded-2xl xl:col-span-2 shadow-sm border border-gray-100 flex flex-col h-[480px]">
                 <h3 className="text-xl font-bold text-gray-900 mb-8">Order Volume (Past 7 Days)</h3>
                 <div className="flex-1 flex items-end justify-around gap-4 mt-auto">
-                  {trendData.map((data, idx) => {
+                  {stats.trendData.map((data, idx) => {
                     const height = (data.value / maxTrendValue) * 100;
                     return (
                       <div key={idx} className="flex flex-col items-center w-full max-w-[60px] h-full justify-end group">
@@ -240,7 +408,7 @@ export default function AdminDashboard() {
               <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[480px]">
                 <h3 className="text-xl font-bold text-gray-900 mb-8">Top Services</h3>
                 <div className="space-y-8 flex-1 flex flex-col justify-center">
-                  {topServices.map((service, idx) => (
+                  {stats.topServices.map((service, idx) => (
                     <div key={idx}>
                       <div className="flex justify-between text-sm mb-3">
                         <span className="font-semibold text-gray-700">{service.name}</span>
@@ -259,57 +427,88 @@ export default function AdminDashboard() {
 
               </div>
               {/* Revenue Trend (This Month) */}
-<div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 mt-8">
-  <h3 className="text-xl font-bold text-gray-900 mb-6">
-    Revenue Trend (This Month)
-  </h3>
+              <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 mt-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">
+                  Revenue Trend (This Month)
+                </h3>
 
-  <div className="h-[300px]">
-    <Line
-      data={{
-        labels: revenueTrend.map((d) => d.day),
+                <div className="h-[300px]">
+                  <Line
+                    data={{
+                      labels: stats.revenueTrend.map((d) => d.day),
+                      datasets: [
+                        {
+                          label: "Revenue",
+                          data: stats.revenueTrend.map((d) => d.value),
+                          borderColor: "#dc2626",
+                          backgroundColor: "rgba(220, 38, 38, 0.15)",
+                          fill: true,
+                          tension: 0.4,
+                          pointRadius: 3,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
 
-        datasets: [
-          {
-            label: "Revenue",
-            data: revenueTrend.map((d) => d.value),
+                      plugins: {
+                        legend: { display: false },
+                      },
 
-            borderColor: "#dc2626",
-            backgroundColor: "rgba(220, 38, 38, 0.15)",
-            fill: true,
+                      scales: {
+                        x: {
+                          grid: { display: false },
+                        },
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            callback: (value) => `₱${value / 1000}k`,
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+              
 
-            tension: 0.4,
-            pointRadius: 3,
-          },
-        ],
-      }}
-      options={{
-        responsive: true,
-        maintainAspectRatio: false,
+              {/* AI REVENUE FORECAST (SARIMAX MODEL) */}
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 mt-8">
+              
+              <div className="flex items-center gap-3 mb-6">
+                
+                <h3 className="text-xl font-bold text-gray-900">
+                  Forecasted Revenue (Next 4 Weeks)
+                </h3>
+              </div>
 
-        plugins: {
-          legend: { display: false },
-        },
-
-        scales: {
-          x: {
-            grid: { display: false },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: (value) => `₱${value / 1000}k`,
-            },
-          },
-        },
-      }}
-    />
-  </div>
-</div>
-
-{/* CLOSE OVERVIEW TAB */}
-</div>
-)} 
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {forecastData && forecastData.length > 0 ? (
+                  forecastData.map((data, idx) => (
+                    <div key={idx} className="bg-gray-50 border border-gray-100 p-6 rounded-xl flex flex-col gap-2 hover:border-red-200 hover:bg-red-50/30 transition-colors">
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        Week of {data.week}
+                      </span>
+                      <span className="text-3xl font-black text-gray-900">
+                        ₱{data.predicted_revenue.toLocaleString()}
+                      </span>
+                      <div className="text-xs font-bold text-red-500 mt-2 flex items-center gap-1">
+                        SARIMAX Projection
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-4 py-10 text-center text-gray-500 font-medium bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                    Loading SARIMAX predictions...
+                  </div>
+                )}
+              </div>
+              
+            </div>
+              {/* CLOSE OVERVIEW TAB */}
+              </div>
+              )} 
 
         
 
@@ -454,7 +653,7 @@ export default function AdminDashboard() {
               <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-red-600 text-4xl transition-colors">&times;</button>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Customer</p>
                 <p className="font-bold text-gray-900 text-xl">{selectedOrder.customer}</p>
@@ -463,40 +662,67 @@ export default function AdminDashboard() {
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Service</p>
                 <p className="font-bold text-gray-900 text-xl">{selectedOrder.service}</p>
               </div>
+              {/* THE NEW FIX: ADD THE TOTAL PRICE HERE */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Total Amount</p>
+                <p className="font-black text-red-600 text-xl">
+                  ₱{parseFloat(selectedOrder.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </p>
+              </div>
             </div>
 
             <div className="space-y-8">
               {/* Action 1 */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Customer Design File</label>
-                <button 
-                  onClick={() => alert(`Backend Trigger: Downloading -> ${selectedOrder.file}`)}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-900 py-4 rounded-xl border-2 border-gray-200 flex items-center justify-center gap-3 transition-colors font-bold text-lg shadow-sm"
-                >
-                  <FiDownload className="text-xl text-red-500" /> Download {selectedOrder.file}
-                </button>
+                
+                {selectedOrder.files && selectedOrder.files.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {selectedOrder.files.map((fileObj, index) => (
+                      <a 
+                        key={index}
+                        href={fileObj.file} /* This is the actual image URL from Django */
+                        download 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-white hover:bg-gray-50 text-gray-900 py-4 rounded-xl border-2 border-gray-200 flex items-center justify-center gap-3 transition-colors font-bold text-lg shadow-sm"
+                      >
+                        <FiDownload className="text-xl text-red-500" /> Download {fileObj.file_name}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="w-full bg-gray-50 text-gray-500 py-4 rounded-xl border-2 border-gray-200 border-dashed flex items-center justify-center font-semibold">
+                    No design files uploaded
+                  </div>
+                )}
               </div>
 
               {/* Action 2 */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Update Order Status</label>
                 <div className="flex gap-4">
-                  {['Pending', 'Processing', 'Completed'].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => handleUpdateStatus(selectedOrder.id, status)}
-                      className={`flex-1 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all border-2 ${
-                        selectedOrder.status === status 
-                          ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-200' 
-                          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-900'
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ))}
+                  {['Pending', 'Processing', 'Completed'].map((status) => {
+                    
+                    // THE FIX: Compare both strings in lowercase!
+                    const isActive = selectedOrder.status?.toLowerCase() === status.toLowerCase();
+
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => handleUpdateStatus(selectedOrder.id, status)}
+                        className={`flex-1 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all border-2 ${
+                          isActive 
+                            ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-200' 
+                            : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-900'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-
               {/* Action 3 */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Internal Notes</label>

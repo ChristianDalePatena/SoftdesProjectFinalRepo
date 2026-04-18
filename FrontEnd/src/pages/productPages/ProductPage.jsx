@@ -49,37 +49,37 @@ const PRODUCTS = {
   "mug": {
     label: "Mug Printing",
     subtitle: "Customize and place your mug printing order below.",
-    startingPrice: "₱60.00", 
+    startingPrice: "₱120.00", 
     Form: MugOrderForm,
   },
   "tarpaulin": {
     label: "Tarpaulin Printing",
     subtitle: "Enter your size, design, and accessories to get an instant price estimate.",
-    startingPrice: "₱150.00",
+    startingPrice: "₱210.00",
     Form: TarpaulinOrderForm,
   },
   "sticker": {
     label: "Sticker Printing",
     subtitle: "Customize shape, finish, and quantity — get an instant price estimate.",
-    startingPrice: "₱45.00",
+    startingPrice: "₱5.00",
     Form: StickerOrderForm,
   },
   "sintra-board": {
     label: "Sintra Board Printing",
     subtitle: "Professional PVC signage boards — customize size, thickness, and mounting options.",
-    startingPrice: "₱150.00",
+    startingPrice: "₱120.00",
     Form: SintraBoardOrderForm,
   },
   "pull-up-banner": {
     label: "Pull-Up Banner Printing",
     subtitle: "Professional roll-up banners — customize size, material, and stand type.",
-    startingPrice: "₱1,500.00",
+    startingPrice: "₱1,200.00",
     Form: PullUpBannerOrderForm,
   },
   "frosted-sticker": {
     label: "Frosted Sticker Printing",
     subtitle: "Custom frosted vinyl for glass, windows, and office partitions.",
-    startingPrice: "₱800.00",
+    startingPrice: "₱80.00",
     Form: FrostedStickerOrderForm,
   },
   "button-pin": {
@@ -91,7 +91,7 @@ const PRODUCTS = {
   "lanyard": {
     label: "Lanyard Printing",
     subtitle: "Customize width, material, hooks, and design for your lanyards.",
-    startingPrice: "₱35.00",
+    startingPrice: "₱1,950",
     Form: LanyardOrderForm,
   },
   "cap": {

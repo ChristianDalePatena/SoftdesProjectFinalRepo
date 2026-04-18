@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
 // IMPORT ALL OUR BEAUTIFUL ICONS HERE
 import { 
@@ -212,10 +213,59 @@ setErrors(e)
 return Object.keys(e).length === 0
 }
 
-const handleSubmit = () => {
-if (!validate()) return
-alert(`✅ Order submitted!\n\nFrosted Sticker – ${frostType}\nSize: ${width}×${height} ${unit}\nQty: ${qty}\nTotal: ₱${pricing.total}`)
-}
+const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    const formData = new FormData();
+    formData.append("total_amount", pricing.total);
+    formData.append("delivery_type", delivery.toLowerCase());
+    if (delivery === "Delivery") formData.append("address", address);
+
+    const orderDetails = `
+      Size: ${width} × ${height} ${unit} (Area: ${pricing.sqFt} sq.ft)
+      Frost Style: ${frostType} (${opacity})
+      Shape & Cut: ${shape} - ${cuttingType}
+      Installation: Service(${withInstall ? 'Yes' : 'No'}), Transfer Tape(${withTape ? 'Yes' : 'No'})
+      Usage: ${usage === "Others" ? (otherUsage || "Others") : usage}
+      Needs Design Assist: ${needsDesign ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Calculate final unit price including installation/tape spread across the quantity
+    const exactUnitPrice = pricing.total / qty;
+
+    const cartItems = [{
+        service_slug: "frosted", // <-- Check your Django Admin slug!
+        quantity: qty,
+        price_per_unit: exactUnitPrice,
+        options: {
+            size: `${width}x${height} ${unit}`,
+            frost_type: frostType,
+            opacity: opacity,
+            shape: shape,
+            cutting_type: cuttingType
+        }
+    }];
+    formData.append("items", JSON.stringify(cartItems));
+
+    if (file && file.length > 0) formData.append("design_file", file[0]);
+
+    const token = localStorage.getItem('access_token');
+    if (!token) return navigate("/signin");
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: formData
+        });
+        if (res.ok) {
+            alert("✅ Frosted Sticker order submitted!");
+            navigate("/account");
+        } else alert(`Order Failed: ${JSON.stringify(await res.json())}`);
+    } catch (err) { alert("Network error. Is Django running?"); }
+  }
 
 const pricing = computePrice({ widthIn: width, heightIn: height, unit, qty, frostType, cuttingType, withInstall, withTape })
 

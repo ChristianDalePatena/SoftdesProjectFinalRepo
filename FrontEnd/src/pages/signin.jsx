@@ -5,7 +5,7 @@ import { FiMail, FiLock, FiUser, FiPhone, FiEye, FiEyeOff } from 'react-icons/fi
 export default function SignIn() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", full_name: "", phone: "" });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,22 +22,71 @@ export default function SignIn() {
     setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.email || !form.password) {
-      setError("Please fill in all fields.");
+    
+    // 1. Validation check for all required fields
+    if (!form.email || !form.password || (!isLogin && (!form.full_name || !form.phone))) {
+      setError("Please fill in all required fields.");
       return;
     }
 
     setLoading(true);
 
-    // Simulate backend auth delay
-    setTimeout(() => {
+    // 2. Decide which Django endpoint to hit
+    const endpoint = isLogin 
+      ? 'http://127.0.0.1:8000/api/auth/login/' 
+      : 'http://127.0.0.1:8000/api/auth/register/';
+
+    // 3. Build the payload (Register needs name/phone, Login doesn't)
+    const payload = isLogin 
+      ? { email: form.email, password: form.password }
+      : { email: form.email, password: form.password, full_name: form.full_name, phone: form.phone };
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success! (Your Django backend returns tokens for BOTH login and register)
+        localStorage.setItem('access_token', data.tokens.access);
+        localStorage.setItem('refresh_token', data.tokens.refresh);
+        localStorage.setItem('user_role', data.user.role);
+        localStorage.setItem('user_name', data.user.full_name);
+
+        setLoading(false);
+        
+        // Route Admins to dashboard, Customers to account
+        if (data.user.role === 'admin' || data.user.role === 'staff') {
+           navigate("/admin"); 
+        } else {
+           navigate("/account"); 
+        }
+      } else {
+        // Handle Errors 
+        // Now it checks for password and full_name errors too!
+        const errorMessage = 
+          data.error || 
+          data.email?.[0] || 
+          data.password?.[0] || 
+          data.phone?.[0] ||
+          data.detail || 
+          "Something went wrong. Please check your details.";
+          
+        setError(errorMessage);
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("Cannot connect to server. Is Django running?");
       setLoading(false);
-      // Navigate to customer dashboard upon success
-      navigate("/account"); 
-    }, 1200);
+    }
   };
 
   return (
@@ -109,7 +158,15 @@ export default function SignIn() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                       <FiUser className="text-lg" />
                     </div>
-                    <input type="text" required className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-semibold focus:outline-none focus:border-red-500 focus:bg-white transition-all" placeholder="Your Full Name" />
+                    <input 
+                      type="text" 
+                      name="full_name"
+                      value={form.full_name}
+                      onChange={handleChange}
+                      required 
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-semibold focus:outline-none focus:border-red-500 focus:bg-white transition-all" 
+                      placeholder="Your Full Name" 
+                    />
                   </div>
                 </div>
                 <div>
@@ -118,7 +175,15 @@ export default function SignIn() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                       <FiPhone className="text-lg" />
                     </div>
-                    <input type="tel" required className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-semibold focus:outline-none focus:border-red-500 focus:bg-white transition-all" placeholder="Your Phone Number" />
+                    <input 
+                      type="tel" 
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      required 
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-semibold focus:outline-none focus:border-red-500 focus:bg-white transition-all" 
+                      placeholder="Your Phone Number" 
+                    />
                   </div>
                 </div>
               </div>

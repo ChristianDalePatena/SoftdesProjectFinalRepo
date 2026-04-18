@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -23,6 +24,9 @@ class OrderListCreateView(APIView):
     POST /api/orders/
     """
     permission_classes = [IsAuthenticated]
+    
+    # ADD THIS LINE: Tells Django to accept files and form data!
+    parser_classes = [MultiPartParser, FormParser, JSONParser] 
 
     def get(self, request):
         orders = Order.objects.filter(
@@ -37,39 +41,75 @@ class OrderListCreateView(APIView):
         return Response(serializer.data)
 
     @transaction.atomic
-    def post(self, request):                    # ← fixed: removed order_code param
-        serializer = OrderCreateSerializer(data=request.data)
+    def post(self, request):           
+        # THE FIX: Convert QueryDict to a standard Python dictionary so it accepts lists!
+        data = dict(request.data.items())
+
+        # Now parse the items string into a real Python list!
+        if 'items' in data and isinstance(data['items'], str):
+            try:
+                data['items'] = json.loads(data['items'])
+            except json.JSONDecodeError:
+                return Response(
+                    {"items": ["Invalid JSON format for items."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Pass our normal, parsed dictionary to the serializer
+        serializer = OrderCreateSerializer(data=data)
         if not serializer.is_valid():
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        data = serializer.validated_data
+        validated_data = serializer.validated_data
 
         total_price = sum(
             item["price_per_unit"] * item["quantity"]
-            for item in data["items"]
-        ) + data.get("shipping_fee", 0)
+            for item in validated_data["items"]
+        ) + validated_data.get("shipping_fee", 0)
 
         order = Order.objects.create(
             user              = request.user,
-            delivery_type     = data["delivery_type"],
-            address           = data.get("address", ""),
-            payment_method    = data.get("payment_method", "cash"),
-            payment_reference = data.get("payment_reference", ""),
-            shipping_fee      = data.get("shipping_fee", 0),
+            delivery_type     = validated_data["delivery_type"],
+            address           = validated_data.get("address", ""),
+            payment_method    = validated_data.get("payment_method", "cash"),
+            payment_reference = validated_data.get("payment_reference", ""),
+            shipping_fee      = validated_data.get("shipping_fee", 0),
             total_price       = total_price,
+            admin_notes       = data.get("notes", "") 
         )
 
-        for item_data in data["items"]:
-            service = Service.objects.get(slug=item_data["service_slug"])
+        for item_data in validated_data["items"]:
+            service = get_object_or_404(Service, slug=item_data["service_slug"])
             OrderItem.objects.create(
                 order          = order,
                 service        = service,
                 quantity       = item_data["quantity"],
                 price_per_unit = item_data["price_per_unit"],
                 options        = item_data.get("options", {}),
+            )
+            
+        # IMPORTANT: Handle the uploaded design file!
+        if "design_file" in request.FILES:
+            file = request.FILES["design_file"]
+            name = file.name.lower()
+            
+            if name.endswith(".pdf"):
+                file_type = OrderFile.FileType.PDF
+            elif name.endswith(".png"):
+                file_type = OrderFile.FileType.PNG
+            elif name.endswith((".jpg", ".jpeg")):
+                file_type = OrderFile.FileType.JPG
+            else:
+                file_type = OrderFile.FileType.OTHER
+
+            OrderFile.objects.create(
+                order     = order,
+                file      = file,
+                file_name = file.name,
+                file_type = file_type,
             )
 
         return Response(

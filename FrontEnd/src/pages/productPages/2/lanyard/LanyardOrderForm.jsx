@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 import { 
   FiFileText, FiTruck, FiMapPin, FiPackage, FiUploadCloud, FiCheckCircle
@@ -93,11 +94,47 @@ const validate = () => {
     return Object.keys(e).length === 0
 }
 
-const handleSubmit = () => {
-    if (!validate()) return
-    alert(`✅ Order submitted!\n\nLanyard: ${lanyardType}\nQty: ${qty}\nTotal: ₱${total.toLocaleString()}`)
-}
+const navigate = useNavigate();
 
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    const formData = new FormData();
+    formData.append("total_amount", total);
+    formData.append("delivery_type", delivery.toLowerCase());
+    if (delivery === "Delivery") formData.append("address", address);
+
+    const orderDetails = `
+      Lanyard Type: ${lanyardType}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    const cartItems = [{
+        service_slug: "lanyard", // <-- Check your Django Admin slug! (Might be "landyard")
+        quantity: qty,
+        price_per_unit: unitPrice,
+        options: {
+            lanyard_type: lanyardType
+        }
+    }];
+    formData.append("items", JSON.stringify(cartItems));
+
+    if (file && file.length > 0) formData.append("design_file", file[0]);
+
+    const token = localStorage.getItem('access_token');
+    if (!token) return navigate("/signin");
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: formData
+        });
+        if (res.ok) {
+            alert("✅ Lanyard order submitted!");
+            navigate("/account");
+        } else alert(`Order Failed: ${JSON.stringify(await res.json())}`);
+    } catch (err) { alert("Network error. Is Django running?"); }
+  }
 // Removed Unit Price from here since it's now in the breakdown section
 const summaryRows = [
     { label: "Lanyard Type", value: lanyardType },

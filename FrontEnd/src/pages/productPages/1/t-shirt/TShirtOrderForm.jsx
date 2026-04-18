@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 import { 
   FiMinimize, FiImage, FiTruck, 
@@ -55,8 +56,92 @@ export default function TShirtOrderForm() {
   const handleSizeChange = (sz, val) =>
     setSizes((prev) => ({ ...prev, [sz]: Math.max(0, parseInt(val) || 0) }))
 
-  const handleSubmit = () =>
-    alert(`✅ Order submitted!\n\n${type}\nColor: ${color || "—"}\nQty: ${totalQty}\nTotal: ₱${totalPrice.toLocaleString()}`)
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    // 1. Basic Validation
+    if (delivery === "Delivery" && !address.trim()) {
+        alert("Please enter a delivery address.");
+        return;
+    }
+
+    // 2. Package the data using FormData
+    const formData = new FormData();
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    
+    if (delivery === "Delivery") {
+        formData.append("address", address);
+    }
+
+    // Format the sizes for the Admin Notes
+    const activeSizes = Object.entries(sizes)
+        .filter(([, v]) => v > 0)
+        .map(([sz, q]) => `${sz}: ${q}`)
+        .join(", ");
+
+    // Bundle the details
+    const orderDetails = `
+      Type: ${type}
+      Color: ${color || 'N/A'}
+      Sizes: ${sizeTotal > 0 ? activeSizes : `Base Qty (${baseQty})`}
+      Placement: ${placement}
+      Print Size: ${type !== "Polo Shirt" ? printSize : "N/A"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Build the items array
+    const cartItems = [{
+        service_slug: "t-shirt", // <-- Match this to your Django Admin!
+        quantity: totalQty,
+        price_per_unit: pricePerUnit, // Sends your custom calculated price!
+        options: {
+            type: type,
+            color: color || "None",
+            placement: placement,
+            print_size: printSize,
+            size_breakdown: sizes 
+        }
+    }];
+    formData.append("items", JSON.stringify(cartItems));
+
+    // Safely attach the uploaded design file
+    if (file && file.length > 0) {
+        // Because your input uses e.target.files (FileList), grab the first item
+        formData.append("design_file", file[0]); 
+    }
+
+    // 3. Send to Django
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert("Please log-in or create an account to place an order.");
+        navigate("/signin");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ T-Shirt order submitted successfully!");
+            navigate("/account"); 
+        } else {
+            const errorData = await response.json();
+            console.error("Django rejected the order:", errorData);
+            alert(`Order Failed: ${JSON.stringify(errorData)}`);
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Network error. Is your Django server running?");
+    }
+  }
 
   const summaryRows = [
     { label: "Product", value: type },

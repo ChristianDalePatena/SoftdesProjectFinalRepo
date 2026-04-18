@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 import { 
   FiTag, FiScissors, FiImage, FiLayers, FiGrid, FiTruck, 
@@ -23,7 +24,7 @@ const [sizeUnit, setSizeUnit]       = useState("cm")
 const [preset, setPreset]           = useState("3×3")
 const [width, setWidth]             = useState("3")
 const [height, setHeight]           = useState("3")
-const [qty, setQty]                 = useState(50)
+const [qty, setQty]                 = useState(1)
 
 // B. Shape & Cutting
 const [shape, setShape]             = useState("Square")
@@ -68,21 +69,95 @@ const estimatedSheets = autoLayout
 : Math.ceil(safeQty / Math.max(1, stickersPerSheet))
 
 // ── Submit
-const handleSubmit = () => {
-if (!width || !height || parseFloat(width) <= 0 || parseFloat(height) <= 0) {
-    alert("Please enter a valid width and height.")
-    return
-}
-if (safeQty <= 0) {
-    alert("Please enter a valid quantity.")
-    return
-}
-if (delivery === "Delivery" && !address.trim()) {
-    alert("Please enter a delivery address.")
-    return
-}
-alert(`✅ Order submitted!\n\n${stickerType}\nSize: ${width}×${height} ${sizeUnit}\nQty: ${safeQty}\nTotal: ₱${totalPrice.toLocaleString()}`)
-}
+const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    // 1. Basic Validation
+    if (!width || !height || parseFloat(width) <= 0 || parseFloat(height) <= 0) {
+        alert("Please enter a valid width and height.");
+        return;
+    }
+    if (safeQty <= 0) {
+        alert("Please enter a valid quantity.");
+        return;
+    }
+    if (delivery === "Delivery" && !address.trim()) {
+        alert("Please enter a delivery address.");
+        return;
+    }
+
+    // 2. Package the data using FormData
+    const formData = new FormData();
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    
+    if (delivery === "Delivery") {
+        formData.append("address", address);
+    }
+
+    // Bundle all the specific Sticker details for the Admin to read
+    const orderDetails = `
+      Sticker Type: ${stickerType}
+      Size: ${width} × ${height} ${sizeUnit} (Preset: ${preset})
+      Shape: ${shape}
+      Cutting: ${cuttingType}
+      Finish: Lamination(${lamination}), Waterproof(${waterproof}), UV Resistant(${uvResistant})
+      Layout: ${autoLayout ? "Auto" : stickersPerSheet + " per sheet"}
+      Needs Design Assist: ${needsDesign ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Build the items array
+    const cartItems = [
+        {
+            service_slug: "sticker", // <-- CHANGE THIS TO MATCH YOUR DJANGO ADMIN SLUG!
+            quantity: safeQty,
+            price_per_unit: priceEach,
+            options: {
+                size: `${width}x${height} ${sizeUnit}`,
+                shape: shape,
+                finish: stickerType
+            }
+        }
+    ];
+    formData.append("items", JSON.stringify(cartItems));
+
+    // Safely attach the uploaded file
+    if (file && file.length > 0) {
+        formData.append("design_file", file[0]); 
+    }
+
+    // 3. Send to Django
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert("Please log-in or create an account to place an order.");
+        navigate("/signin");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ Sticker order submitted successfully!");
+            navigate("/account"); 
+        } else {
+            const errorData = await response.json();
+            console.error("Django rejected the order:", errorData);
+            alert(`Order Failed: ${JSON.stringify(errorData)}`);
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Network error. Is your Django server running?");
+    }
+  }
 
 const summaryRows = [
 { label: "Sticker Type",  value: stickerType },

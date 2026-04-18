@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 // IMPORT ALL OUR BEAUTIFUL ICONS HERE
 import { 
@@ -119,8 +120,62 @@ const [address, setAddress]   = useState("")
 const unitPrice  = computePrice({ size, standType, withCase, extraStand, replaceOnly })
 const totalPrice = qty * unitPrice
 
-const handleSubmit = () =>
-alert(`✅ Order submitted!\n\n${size}\nQty: ${qty}\nTotal: ₱${totalPrice.toLocaleString()}`)
+const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    if (delivery === "Delivery" && !address.trim()) {
+        alert("Please enter a delivery address.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    if (delivery === "Delivery") formData.append("address", address);
+
+    const orderDetails = `
+      Size: ${size}
+      Material: ${material} (${quality})
+      Stand Type: ${standType}
+      Print Only (No Stand): ${replaceOnly ? "Yes (-30%)" : "No (Full Set)"}
+      Add-ons: Carrying Case(${withCase ? 'Yes' : 'No'}), Extra Stand(${extraStand ? 'Yes' : 'No'})
+      Needs Design Assist: ${needsDesign ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Calculate actual cost per unit including extras (so Django's math checks out)
+    const exactUnitPrice = totalPrice / qty; 
+
+    const cartItems = [{
+        service_slug: "banner", // <-- Check your Django Admin slug!
+        quantity: qty,
+        price_per_unit: exactUnitPrice,
+        options: {
+            size: size,
+            material: material,
+            quality: quality,
+            stand_type: standType,
+            replace_only: replaceOnly ? "Print Only" : "Full Set"
+        }
+    }];
+    formData.append("items", JSON.stringify(cartItems));
+
+    if (file && file.length > 0) formData.append("design_file", file[0]);
+
+    const token = localStorage.getItem('access_token');
+    if (!token) return navigate("/signin");
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: formData
+        });
+        if (res.ok) {
+            alert("✅ Pull-Up Banner order submitted!");
+            navigate("/account");
+        } else alert(`Order Failed: ${JSON.stringify(await res.json())}`);
+    } catch (err) { alert("Network error. Is Django running?"); }
+  }
 
 // Summary rows
 const summaryRows = [

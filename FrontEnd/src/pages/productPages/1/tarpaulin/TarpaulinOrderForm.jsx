@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 import {
   FiMaximize,
@@ -82,22 +83,83 @@ export default function TarpaulinOrderForm() {
   const addOnCost = eyeletCost + ropeCost + standCost
   const totalPrice = printCost + addOnCost
 
-  const handleSubmit = () => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
     if (safeW <= 0 || safeH <= 0) {
-      alert("Please enter a valid width and height.")
-      return
+      alert("Please enter a valid width and height.");
+      return;
     }
     if (qty <= 0) {
-      alert("Please enter a valid quantity.")
-      return
+      alert("Please enter a valid quantity.");
+      return;
     }
     if (delivery === "Delivery" && !address.trim()) {
-      alert("Please enter a delivery address.")
-      return
+      alert("Please enter a delivery address.");
+      return;
     }
-    alert(
-      `✅ Order submitted!\n\nTarpaulin ${safeW}×${safeH} ft\nArea: ${area} sq ft\nQty: ${qty}\nTotal: ₱${totalPrice.toLocaleString()}`
-    )
+
+    const formData = new FormData();
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    if (delivery === "Delivery") {
+      formData.append("address", address);
+    }
+
+    const orderDetails = `
+      Size: ${safeW} × ${safeH} ft (Preset: ${preset})
+      Material: ${material} (${thickness})
+      Add-ons: Eyelets(${eyelets ? 'Yes' : 'No'}), Rope(${rope ? 'Yes' : 'No'}), Stand(${stand ? 'Yes' : 'No'})
+      Usage: ${usage === "Others" ? (otherUsage || "Others") : usage}
+      Needs Design Assist: ${needDesign ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Calculate total price per single tarpaulin (Print cost + Add-ons)
+    const unitPrice = (area * BASE_RATE) + addOnCost;
+
+    const cartItems = [{
+        service_slug: "tarpaulin", // <-- Double check this slug in Django Admin!
+        quantity: qty,
+        price_per_unit: unitPrice,
+        options: {
+            size: `${safeW}x${safeH} ft`,
+            material: material,
+            thickness: thickness
+        }
+    }];
+    formData.append("items", JSON.stringify(cartItems));
+
+    // Notice: Your file state in Tarpaulin is already the File object, not a FileList
+    if (file) {
+        formData.append("design_file", file); 
+    }
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert("Please log-in or create an account.");
+        navigate("/signin");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ Tarpaulin order submitted successfully!");
+            navigate("/account"); 
+        } else {
+            const errorData = await response.json();
+            alert(`Order Failed: ${JSON.stringify(errorData)}`);
+        }
+    } catch (error) {
+        alert("Network error. Is your Django server running?");
+    }
   }
 
   const summaryRows = [

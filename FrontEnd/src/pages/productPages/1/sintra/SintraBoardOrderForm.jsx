@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useRef } from "react"
 import { 
   FiClipboard, FiLayers, FiPrinter, FiTool, FiImage, FiGrid, FiTruck, 
@@ -78,21 +79,96 @@ const printCost     = areaFt2 * pricePerFt2 * safeQty
 const totalPrice    = printCost + (withStand ? standAdd : 0)
 
 // ── Submit
-const handleSubmit = () => {
-if (safeW <= 0 || safeH <= 0) {
-    alert("Please enter a valid width and height.")
-    return
-}
-if (safeQty <= 0) {
-    alert("Please enter a valid quantity.")
-    return
-}
-if (delivery === "Delivery" && !address.trim()) {
-    alert("Please enter a delivery address.")
-    return
-}
-alert(`✅ Order submitted!\n\nSintra Board ${width}×${height} ${unit}\nQty: ${safeQty}\nTotal: ₱${totalPrice.toLocaleString()}`)
-}
+const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    // 1. Basic Validation
+    if (safeW <= 0 || safeH <= 0) {
+        alert("Please enter a valid width and height.");
+        return;
+    }
+    if (safeQty <= 0) {
+        alert("Please enter a valid quantity.");
+        return;
+    }
+    if (delivery === "Delivery" && !address.trim()) {
+        alert("Please enter a delivery address.");
+        return;
+    }
+
+    // 2. Package the data
+    const formData = new FormData();
+    formData.append("total_amount", totalPrice);
+    formData.append("delivery_type", delivery.toLowerCase());
+    
+    if (delivery === "Delivery") {
+        formData.append("address", address);
+    }
+
+    // Bundle all the Sintra details for the Admin to read
+    const orderDetails = `
+      Size: ${safeW} × ${safeH} ${unit} (Preset: ${preset})
+      Thickness: ${thickness}
+      Finish: ${finish}
+      Print Type: ${printType}
+      Lamination: ${lamination}
+      Mounting: Stand(${withStand ? 'Yes' : 'No'}), Wall Mount(${withMount ? 'Yes' : 'No'}), Adhesive(${withAdhesive ? 'Yes' : 'No'})
+      Usage: ${usage === "Others" ? (otherUsage || "Others") : usage}
+      Needs Design Assist: ${needsDesign ? "Yes" : "No"}
+      Special Instructions: ${instructions}
+    `;
+    formData.append("notes", orderDetails.trim());
+
+    // Build the items array
+    const unitPrice = totalPrice / safeQty; // Calculate cost per single board
+    const cartItems = [
+        {
+            service_slug: "sintra", // <-- CHANGE THIS TO MATCH YOUR DJANGO ADMIN SLUG!
+            quantity: safeQty,
+            price_per_unit: unitPrice,
+            options: {
+                size: `${safeW}x${safeH} ${unit}`,
+                thickness: thickness
+            }
+        }
+    ];
+    formData.append("items", JSON.stringify(cartItems));
+
+    // Safely attach the uploaded file
+    if (file && file.length > 0) {
+        formData.append("design_file", file[0]); 
+    }
+
+    // 3. Send to Django
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert("Please log-in or create an account to place an order.");
+        navigate("/signin");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ Sintra Board order submitted successfully!");
+            navigate("/account"); 
+        } else {
+            const errorData = await response.json();
+            console.error("Django rejected the order:", errorData);
+            alert(`Order Failed: ${JSON.stringify(errorData)}`);
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Network error. Is your Django server running?");
+    }
+  }
 
 const summaryRows = [
 { label: "Size",         value: safeW > 0 && safeH > 0 ? `${safeW} × ${safeH} ${unit} (${areaFt2.toFixed(2)} sq ft)` : "—" },
