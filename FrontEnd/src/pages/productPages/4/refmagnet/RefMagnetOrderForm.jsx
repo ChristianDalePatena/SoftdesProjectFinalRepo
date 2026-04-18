@@ -1,4 +1,13 @@
 import { useState, useRef } from "react"
+import {
+  FiTruck, FiAlertTriangle, FiImage, FiCheckCircle, FiPenTool,
+  FiEdit2, FiPackage, FiStar, FiBarChart2, FiClipboard,
+  FiSquare, FiCircle, FiScissors, FiMapPin, FiInfo,
+  FiGift, FiSmartphone, FiAward, FiLayers, FiZap
+} from "react-icons/fi"
+import { TbMagnet, TbDiamond, TbRectangle } from "react-icons/tb"
+import { LuRockingChair } from "react-icons/lu"
+import { MdOutlineShieldMoon } from "react-icons/md"
 
 // ── Primitives ─────────────────────────────────────────────────────────────────
 const inputCls =
@@ -155,22 +164,18 @@ return (
         border: "1px solid rgba(0,0,0,0.08)",
     }}
     >
-    {/* Metallic sheen */}
     {shimmer && (
         <div className="absolute inset-0 pointer-events-none" style={{
         background: "linear-gradient(120deg, rgba(255,215,0,0.18) 0%, rgba(255,255,255,0.55) 40%, rgba(192,192,192,0.18) 100%)",
         }} />
     )}
-    {/* Glossy reflection */}
     {glossy && (
         <div className="absolute top-0 left-0 right-0 h-1/3 pointer-events-none" style={{
         background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%)",
         }} />
     )}
-    {/* Material tint */}
     <div className="absolute inset-0 pointer-events-none" style={{ background: matColor }} />
 
-    {/* Content */}
     <div className="relative z-10 flex flex-col items-center justify-center gap-0.5 px-2 w-full text-center">
         {hasContent ? (
         designMode === "manual" && title ? (
@@ -188,22 +193,17 @@ return (
             </>
         ) : (
             <div className="flex flex-col items-center gap-1 opacity-50">
-            <span className="text-lg">🖼️</span>
+            <FiImage className="text-lg text-gray-500" />
             <span className="text-[7px] text-gray-500 font-semibold">Design Ready</span>
             </div>
         )
         ) : (
         <div className="flex flex-col items-center gap-0.5 opacity-25">
-            <span className="text-base">🧲</span>
+            <TbMagnet className="text-base text-gray-500" />
             <span className="text-[7px] text-gray-500">Preview</span>
         </div>
         )}
     </div>
-
-    {/* QR code hint dot */}
-    {false && (
-        <div className="absolute bottom-1 right-1 w-4 h-4 bg-gray-800 rounded-sm opacity-60" />
-    )}
     </div>
 
     <div className="flex flex-col items-center gap-0.5">
@@ -246,20 +246,17 @@ return { unitPrice: base, total: base * Math.max(1, qty) }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function RefMagnetOrderForm() {
-// A. Magnet Details
 const [magnetType, setMagnetType]   = useState("Photo Magnet")
 const [shape, setShape]             = useState("Rectangle")
 const [size, setSize]               = useState("Medium (3\" × 4\")")
 const [customSize, setCustomSize]   = useState("")
 const [qty, setQty]                 = useState(10)
 
-// B. Material & Finish
 const [material, setMaterial]       = useState("Flexible Magnet Sheet")
 const [finish, setFinish]           = useState("Glossy")
 const [thickness, setThickness]     = useState("Standard")
 
-// C. Design
-const [designMode, setDesignMode]   = useState("upload")  // "upload" | "manual"
+const [designMode, setDesignMode]   = useState("upload")
 const [designFile, setDesignFile]   = useState(null)
 const [photoFile, setPhotoFile]     = useState(null)
 const [title, setTitle]             = useState("")
@@ -269,19 +266,16 @@ const [colorTheme, setColorTheme]   = useState("#ffffff")
 const designRef = useRef()
 const photoRef  = useRef()
 
-// D. Bulk Order
 const [bulkOrder, setBulkOrder]     = useState(false)
 const [csvFile, setCsvFile]         = useState(null)
 const csvRef = useRef()
 
-// E. Add-ons
 const [roundedCorners, setRoundedCorners]   = useState(false)
 const [glossLamination, setGlossLamination] = useState(false)
 const [qrCode, setQrCode]                   = useState(false)
 const [metallicFinish, setMetallicFinish]   = useState(false)
 const [packaging, setPackaging]             = useState(false)
 
-// F. Delivery
 const [delivery, setDelivery]       = useState("Pickup")
 const [address, setAddress]         = useState("")
 
@@ -307,23 +301,29 @@ alert(`✅ Order submitted!\n\nRef Magnet – ${magnetType}\nShape: ${shape} · 
 const pricing = computePrice({ qty, material, thickness, size, shape, finish, qrCode, metallicFinish, packaging })
 
 const SHAPES = [
-{ val: "Rectangle",               icon: "▬", desc: "Classic landscape layout" },
-{ val: "Square",                  icon: "■", desc: "Balanced, modern look" },
-{ val: "Circle",                  icon: "●", desc: "Elegant round design" },
-{ val: "Die-cut (custom shape)",  icon: "✂️", desc: "Custom silhouette cutout", badge: "+₱5" },
+{ val: "Rectangle",              icon: <TbRectangle className="text-gray-500" />, desc: "Classic landscape layout" },
+{ val: "Square",                 icon: <FiSquare className="text-gray-500" />,    desc: "Balanced, modern look" },
+{ val: "Circle",                 icon: <FiCircle className="text-gray-500" />,    desc: "Elegant round design" },
+{ val: "Die-cut (custom shape)", icon: <FiScissors className="text-gray-500" />,  desc: "Custom silhouette cutout", badge: "+₱5" },
 ]
 
 const SIZES = [
-{ val: "Small (2\" × 2\")",   desc: "Compact collector size" },
-{ val: "Medium (3\" × 4\")",  desc: "Most popular — great detail" },
-{ val: "Large (4\" × 6\")",   desc: "Maximum visual impact", badge: "+₱5" },
-{ val: "Custom",              desc: "Your exact dimensions" },
+{ val: "Small (2\" × 2\")",  desc: "Compact collector size" },
+{ val: "Medium (3\" × 4\")", desc: "Most popular — great detail" },
+{ val: "Large (4\" × 6\")",  desc: "Maximum visual impact", badge: "+₱5" },
+{ val: "Custom",             desc: "Your exact dimensions" },
 ]
 
 const MATERIALS = [
-{ val: "Flexible Magnet Sheet", icon: "🧲", desc: "Lightweight, thin, and durable" },
-{ val: "Rigid Magnet Board",    icon: "🪨", desc: "Firm backing, premium feel" },
-{ val: "Acrylic Magnet",        icon: "💎", desc: "Crystal-clear luxury finish",    badge: "+₱10" },
+{ val: "Flexible Magnet Sheet", icon: <TbMagnet className="text-gray-500" />,   desc: "Lightweight, thin, and durable" },
+{ val: "Rigid Magnet Board",    icon: <FiLayers className="text-gray-500" />,   desc: "Firm backing, premium feel" },
+{ val: "Acrylic Magnet",        icon: <TbDiamond className="text-gray-500" />,  desc: "Crystal-clear luxury finish", badge: "+₱10" },
+]
+
+const FINISHES = [
+{ val: "Glossy",    icon: <FiZap className="text-gray-500" />,               desc: "Shiny & vibrant" },
+{ val: "Matte",     icon: <FiSquare className="text-gray-400" />,             desc: "Soft, no-glare" },
+{ val: "Laminated", icon: <MdOutlineShieldMoon className="text-gray-500" />,  desc: "Protective film", badge: "+₱3" },
 ]
 
 const selectedAddons = [
@@ -335,16 +335,16 @@ packaging       && "Individual Wrap",
 ].filter(Boolean)
 
 const summaryRows = [
-{ label: "Type",         value: magnetType },
-{ label: "Shape",        value: shape },
-{ label: "Size",         value: size === "Custom" ? `Custom (${customSize || "—"})` : size },
-{ label: "Material",     value: material },
-{ label: "Finish",       value: finish },
-{ label: "Thickness",    value: thickness },
-{ label: "Quantity",     value: `${qty.toLocaleString()} pcs` },
-{ label: "Design",       value: designMode === "upload" ? (designFile ? designFile.name : "—") : title || "—" },
+{ label: "Type",      value: magnetType },
+{ label: "Shape",     value: shape },
+{ label: "Size",      value: size === "Custom" ? `Custom (${customSize || "—"})` : size },
+{ label: "Material",  value: material },
+{ label: "Finish",    value: finish },
+{ label: "Thickness", value: thickness },
+{ label: "Quantity",  value: `${qty.toLocaleString()} pcs` },
+{ label: "Design",    value: designMode === "upload" ? (designFile ? designFile.name : "—") : title || "—" },
 ...(selectedAddons.length ? [{ label: "Add-ons", value: selectedAddons.join(", ") }] : []),
-{ label: "Delivery",     value: delivery },
+{ label: "Delivery",  value: delivery },
 ]
 
 return (
@@ -354,7 +354,7 @@ return (
     <div className="xl:col-span-2 flex flex-col gap-6">
 
     {/* Magnet Details */}
-    <SectionCard title="Magnet Details" icon="🧲">
+    <SectionCard title="Magnet Details" icon={<TbMagnet />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Magnet Type" required>
@@ -422,7 +422,7 @@ return (
             {errors.qty && <p className="text-[11px] text-red-500 mt-1">{errors.qty}</p>}
             {qty >= 100 && (
             <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-4 py-2 text-xs text-green-700 mt-1">
-                <span>🎉</span>
+                <FiGift className="shrink-0 text-green-500" />
                 <span className="font-semibold">Bulk order! Volume discount may apply — our team will confirm.</span>
             </div>
             )}
@@ -432,7 +432,7 @@ return (
     </SectionCard>
 
     {/* Material & Finish */}
-    <SectionCard title="Material & Finish" icon="✨">
+    <SectionCard title="Material & Finish" icon={<FiZap />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Material">
@@ -446,11 +446,7 @@ return (
 
         <Field label="Surface Finish">
             <div className="grid grid-cols-3 gap-2">
-            {[
-                { val: "Glossy",    icon: "✨", desc: "Shiny & vibrant" },
-                { val: "Matte",     icon: "🪵", desc: "Soft, no-glare" },
-                { val: "Laminated", icon: "🛡️", desc: "Protective film", badge: "+₱3" },
-            ].map(({ val, icon, desc, badge }) => (
+            {FINISHES.map(({ val, icon, desc, badge }) => (
                 <button
                 key={val}
                 type="button"
@@ -475,10 +471,14 @@ return (
         <Field label="Thickness">
             <div className="flex gap-3">
             <ToggleBtn active={thickness === "Standard"} onClick={() => setThickness("Standard")}>
-                📄 Standard
+                <span className="flex items-center justify-center gap-2">
+                <FiLayers className="text-base" /> Standard
+                </span>
             </ToggleBtn>
             <ToggleBtn active={thickness === "Thick"} onClick={() => setThickness("Thick")}>
-                📦 Thick <span className="text-[10px] font-black opacity-75 ml-1">+₱5</span>
+                <span className="flex items-center justify-center gap-2">
+                <FiPackage className="text-base" /> Thick <span className="text-[10px] font-black opacity-75 ml-1">+₱5</span>
+                </span>
             </ToggleBtn>
             </div>
         </Field>
@@ -487,10 +487,9 @@ return (
     </SectionCard>
 
     {/* Customization */}
-    <SectionCard title="Customization" icon="🎨">
+    <SectionCard title="Customization" icon={<FiPenTool />}>
         <div className="flex flex-col gap-5">
 
-        {/* Live preview */}
         <div className="flex justify-center py-5 bg-gray-50 rounded-xl border border-gray-100">
             <MagnetPreview
             shape={shape} size={size} finish={finish} material={material}
@@ -506,20 +505,20 @@ return (
             <button
             type="button"
             onClick={() => setDesignMode("upload")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                 designMode === "upload" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
             >
-            📁 Upload Design File
+            <FiImage className="text-base" /> Upload Design File
             </button>
             <button
             type="button"
             onClick={() => setDesignMode("manual")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                 designMode === "manual" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
             >
-            ✏️ Manual Design
+            <FiEdit2 className="text-base" /> Manual Design
             </button>
         </div>
 
@@ -532,7 +531,10 @@ return (
                     errors.design ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
                 }`}
                 >
-                <span className="text-4xl group-hover:scale-110 transition-transform">{designFile ? "✅" : "🖼️"}</span>
+                {designFile
+                    ? <FiCheckCircle className="text-4xl text-green-500 group-hover:scale-110 transition-transform" />
+                    : <FiImage className="text-4xl text-gray-300 group-hover:scale-110 transition-transform" />
+                }
                 {designFile ? (
                     <p className="text-xs text-center text-green-700 font-semibold break-all">{designFile.name}</p>
                 ) : (
@@ -550,19 +552,21 @@ return (
                 </div>
                 {errors.design && <p className="text-[11px] text-red-500 mt-1">{errors.design}</p>}
                 <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 mt-1">
-                <span>💡</span>
+                <FiInfo className="shrink-0 mt-0.5 text-blue-400" />
                 <p>Supply files at <strong>300 DPI</strong> minimum. Ensure your design canvas matches the magnet dimensions with a <strong>2mm bleed</strong> on all sides.</p>
                 </div>
             </Field>
 
-            {/* Photo upload for photo magnets */}
             {magnetType === "Photo Magnet" && (
                 <Field label="Photo Upload (Optional)" hint="Upload your photo to be printed on the magnet">
                 <div
                     onClick={() => photoRef.current.click()}
                     className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-red-300 hover:bg-red-50 rounded-xl p-6 cursor-pointer transition group"
                 >
-                    <span className="text-3xl group-hover:scale-110 transition-transform">{photoFile ? "📸" : "🤳"}</span>
+                    {photoFile
+                    ? <FiCheckCircle className="text-3xl text-green-500 group-hover:scale-110 transition-transform" />
+                    : <FiImage className="text-3xl text-gray-300 group-hover:scale-110 transition-transform" />
+                    }
                     {photoFile ? (
                     <p className="text-xs text-center text-green-700 font-semibold break-all">{photoFile.name}</p>
                     ) : (
@@ -582,10 +586,9 @@ return (
             )}
             </>
         ) : (
-            /* Manual Design */
             <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-700">
-                <span>🎨</span>
+                <FiPenTool className="shrink-0 mt-0.5 text-amber-500" />
                 <p className="text-xs leading-relaxed">Fill in the details below and our design team will create your magnet layout. A digital proof will be sent for approval before printing.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -632,14 +635,16 @@ return (
                 </div>
                 </Field>
             </div>
-            {/* Photo for manual mode too */}
             {magnetType === "Photo Magnet" && (
                 <Field label="Photo Upload (Optional)">
                 <div
                     onClick={() => photoRef.current.click()}
                     className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-red-300 hover:bg-red-50 rounded-xl p-6 cursor-pointer transition group"
                 >
-                    <span className="text-3xl group-hover:scale-110 transition-transform">{photoFile ? "📸" : "🤳"}</span>
+                    {photoFile
+                    ? <FiCheckCircle className="text-3xl text-green-500 group-hover:scale-110 transition-transform" />
+                    : <FiImage className="text-3xl text-gray-300 group-hover:scale-110 transition-transform" />
+                    }
                     {photoFile
                     ? <p className="text-xs text-center text-green-700 font-semibold break-all">{photoFile.name}</p>
                     : <p className="text-sm font-semibold text-gray-500">Upload your photo (optional)</p>
@@ -656,17 +661,25 @@ return (
     </SectionCard>
 
     {/* Bulk Order */}
-    <SectionCard title="Order Type" icon="📋">
+    <SectionCard title="Order Type" icon={<FiClipboard />}>
         <div className="flex flex-col gap-4">
         <div className="flex gap-3">
-            <ToggleBtn active={!bulkOrder} onClick={() => setBulkOrder(false)}>🔹 Single Design</ToggleBtn>
-            <ToggleBtn active={bulkOrder} onClick={() => setBulkOrder(true)}>📊 Bulk / Personalized</ToggleBtn>
+            <ToggleBtn active={!bulkOrder} onClick={() => setBulkOrder(false)}>
+            <span className="flex items-center justify-center gap-2">
+                <FiCheckCircle className="text-base" /> Single Design
+            </span>
+            </ToggleBtn>
+            <ToggleBtn active={bulkOrder} onClick={() => setBulkOrder(true)}>
+            <span className="flex items-center justify-center gap-2">
+                <FiBarChart2 className="text-base" /> Bulk / Personalized
+            </span>
+            </ToggleBtn>
         </div>
 
         {bulkOrder ? (
             <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-                <span className="text-lg shrink-0">📋</span>
+                <FiClipboard className="text-lg shrink-0 mt-0.5 text-blue-400" />
                 <div>
                 <p className="font-bold mb-1">Bulk Personalization — CSV Upload</p>
                 <p className="text-xs leading-relaxed">
@@ -685,7 +698,10 @@ return (
                     errors.csv ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
                 }`}
                 >
-                <span className="text-3xl group-hover:scale-110 transition-transform">{csvFile ? "✅" : "📊"}</span>
+                {csvFile
+                    ? <FiCheckCircle className="text-3xl text-green-500 group-hover:scale-110 transition-transform" />
+                    : <FiBarChart2 className="text-3xl text-gray-300 group-hover:scale-110 transition-transform" />
+                }
                 {csvFile
                     ? <p className="text-xs text-center text-green-700 font-semibold">{csvFile.name}</p>
                     : <p className="text-xs text-gray-400 text-center">Click to upload .csv or .xlsx</p>
@@ -698,7 +714,7 @@ return (
             </div>
         ) : (
             <div className="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-700">
-            <span>🔹</span>
+            <FiCheckCircle className="shrink-0 mt-0.5 text-green-500" />
             <p><strong>Single design</strong> — all {qty.toLocaleString()} magnet{qty !== 1 ? "s" : ""} will be printed with the same layout.</p>
             </div>
         )}
@@ -706,12 +722,12 @@ return (
     </SectionCard>
 
     {/* Add-ons */}
-    <SectionCard title="Add-ons" icon="⭐">
+    <SectionCard title="Add-ons" icon={<FiStar />}>
         <div className="flex flex-col gap-3">
         <AddOnToggle
             label="Rounded Corners"
             sublabel="Smooth 4mm radius — polished souvenir look"
-            icon="🔲"
+            icon={<FiSquare />}
             priceLabel="Free"
             checked={roundedCorners}
             onChange={() => setRoundedCorners(!roundedCorners)}
@@ -719,7 +735,7 @@ return (
         <AddOnToggle
             label="Gloss Lamination"
             sublabel="Extra protective gloss film — enhances vibrancy"
-            icon="✨"
+            icon={<FiZap />}
             priceLabel="Free"
             checked={glossLamination}
             onChange={() => setGlossLamination(!glossLamination)}
@@ -727,7 +743,7 @@ return (
         <AddOnToggle
             label="QR Code Printing"
             sublabel="Link to a URL, social page, or event photo album"
-            icon="📱"
+            icon={<FiSmartphone />}
             priceLabel="+₱2/pc"
             checked={qrCode}
             onChange={() => setQrCode(!qrCode)}
@@ -735,7 +751,7 @@ return (
         <AddOnToggle
             label="Metallic Finish"
             sublabel="Gold or silver foil effect on select areas"
-            icon="🥇"
+            icon={<FiAward />}
             priceLabel="+₱4/pc"
             checked={metallicFinish}
             onChange={() => setMetallicFinish(!metallicFinish)}
@@ -743,7 +759,7 @@ return (
         <AddOnToggle
             label="Individual Packaging"
             sublabel="Each magnet wrapped in a clear OPP pouch"
-            icon="🎁"
+            icon={<FiGift />}
             priceLabel="+₱3/pc"
             checked={packaging}
             onChange={() => setPackaging(!packaging)}
@@ -752,21 +768,25 @@ return (
     </SectionCard>
 
     {/* Delivery */}
-    <SectionCard title="Delivery" icon="🚚">
+    <SectionCard title="Delivery" icon={<FiTruck />}>
         <div className="flex flex-col gap-4">
         <Field label="Fulfillment Method">
             <div className="flex gap-3">
             <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
-                🏪 Pickup
+                <span className="flex items-center justify-center gap-2">
+                <FiPackage className="text-base" /> Pickup
+                </span>
             </ToggleBtn>
             <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
-                📦 Delivery
+                <span className="flex items-center justify-center gap-2">
+                <FiTruck className="text-base" /> Delivery
+                </span>
             </ToggleBtn>
             </div>
         </Field>
         {delivery === "Pickup" && (
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span>📍</span>
+            <FiMapPin className="shrink-0 mt-0.5 text-blue-400" />
             <p>You'll receive an SMS when your magnets are ready for pickup at our store.</p>
             </div>
         )}
@@ -794,7 +814,7 @@ return (
         {/* Magnet Preview Card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-linear-to-r from-gray-50 to-white">
-            <span className="text-xl">🧲</span>
+            <TbMagnet className="text-xl text-gray-500" />
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-600">Magnet Preview</h2>
         </div>
         <div className="px-6 py-6 flex justify-center bg-gray-50 min-h-45 items-center">
@@ -850,15 +870,28 @@ return (
         </div>
         </div>
 
-        {/* Help Card */}
-        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5">
-        <p className="text-xs font-black uppercase tracking-widest text-yellow-700 mb-2">Need Help?</p>
-        <p className="text-xs text-yellow-700 leading-relaxed">
-            Need help with design templates or bulk orders? Message us on Facebook or email{" "}
-            <a href="mailto:picktwoprint@gmail.com" className="underline font-semibold">
-            picktwoprint@gmail.com
-            </a>
+        {/* Help Card — matched to MousePad format */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💬</span>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+            Need help with design templates or bulk orders? We're happy to help you spec the perfect magnet.
         </p>
+        <div className="flex flex-col gap-2">
+            <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            📞 0947-463-1561
+            </a>
+            <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            💬 Chat on Messenger
+            </a>
+            <a href="mailto:picktwoprint@gmail.com"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            ✉️ picktwoprint@gmail.com
+            </a>
+        </div>
         </div>
 
     </div>

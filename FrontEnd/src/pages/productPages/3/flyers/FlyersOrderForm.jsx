@@ -106,7 +106,7 @@ export default function TarpaulinOrderForm() {
       <div className="xl:col-span-2 flex flex-col gap-6">
 
         {/* SIZE */}
-        <SectionCard title="Tarpaulin Details" icon={<FiMaximize />}>
+        <SectionCard title="Flyers Details" icon={<FiMaximize />}>
           <div className="flex flex-wrap gap-2">
             {PRESETS.map((p) => (
               <button

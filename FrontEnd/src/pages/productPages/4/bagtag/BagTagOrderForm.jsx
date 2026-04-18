@@ -1,4 +1,13 @@
 import { useState, useRef } from "react"
+import {
+  FiTruck, FiAlertTriangle, FiImage, FiCheckCircle, FiPenTool,
+  FiEdit2, FiPackage, FiTag, FiLayers, FiPrinter, FiLink,
+  FiCircle, FiSlash, FiPaperclip, FiLock, FiGift, FiMapPin,
+  FiInfo, FiSquare, FiMaximize, FiUser
+} from "react-icons/fi"
+import { MdOutlineLuggage } from "react-icons/md"
+import { LuSchool, LuBadgeCheck, LuTicket } from "react-icons/lu"
+import { TbCreditCard, TbDiamond, TbFileDescription } from "react-icons/tb"
 
 // ── Primitives ─────────────────────────────────────────────────────────────────
 const inputCls =
@@ -113,7 +122,6 @@ const stroke = isLight ? "#d1d5db" : "none"
 const materialSheen = material === "Acrylic"
 const isPVC = material === "PVC Plastic"
 
-// Shape dimensions
 const shapeProps = {
 Rectangle: { w: 80, h: 48, rx: 6 },
 Round:     { w: 56, h: 56, rx: 28 },
@@ -126,7 +134,6 @@ const svgH = sp.h + 60
 const cx = svgW / 2
 const cy = sp.h / 2 + 14
 
-// Hole position (top center of tag)
 const holeY = 14
 const holeX = cx
 
@@ -134,7 +141,6 @@ return (
 <div className="flex flex-col items-center gap-1.5">
     <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} xmlns="http://www.w3.org/2000/svg">
 
-    {/* Strap / ring above tag */}
     {strapType === "Plastic Loop" && (
         <ellipse cx={holeX} cy={8} rx={8} ry={5} fill="none" stroke="#9ca3af" strokeWidth={2} />
     )}
@@ -145,7 +151,6 @@ return (
         <line x1={holeX} y1={2} x2={holeX} y2={12} stroke="#b45309" strokeWidth={1.5} strokeLinecap="round" strokeDasharray="2 1" />
     )}
 
-    {/* Tag body */}
     <rect
         x={cx - sp.w / 2}
         y={cy - sp.h / 2}
@@ -157,7 +162,6 @@ return (
         strokeWidth={isLight ? 1 : 0}
     />
 
-    {/* Acrylic sheen */}
     {materialSheen && (
         <rect
         x={cx - sp.w / 2}
@@ -170,7 +174,6 @@ return (
         />
     )}
 
-    {/* PVC texture line */}
     {isPVC && (
         <line
         x1={cx - sp.w / 2 + 4}
@@ -182,10 +185,8 @@ return (
         />
     )}
 
-    {/* Hole */}
     <circle cx={holeX} cy={cy - sp.h / 2 + 6} r={3} fill={isLight ? "#e5e7eb" : "rgba(0,0,0,0.3)"} />
 
-    {/* Design content */}
     {(hasDesign || customDesign) ? (
         <>
         <rect x={cx - sp.w / 2 + 8} y={cy - 10} width={sp.w - 16} height={4} rx={2} fill={isLight ? "#ef4444" : "rgba(255,100,100,0.6)"} opacity={0.7} />
@@ -203,7 +204,6 @@ return (
         </g>
     )}
 
-    {/* Double-sided badge */}
     {printType === "Double-sided" && (
         <g>
         <rect x={cx + sp.w / 2 - 22} y={cy + sp.h / 2 - 14} width={20} height={11} rx={3} fill="#3b82f6" opacity={0.85} />
@@ -211,7 +211,6 @@ return (
         </g>
     )}
 
-    {/* Clip below tag */}
     {clipType === "Basic Clip" && (
         <rect x={cx - 5} y={cy + sp.h / 2 + 2} width={10} height={8} rx={2} fill="none" stroke="#9ca3af" strokeWidth={1.5} />
     )}
@@ -239,37 +238,30 @@ return { unitPrice: unit, total: unit * Math.max(1, qty) }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function BagTagOrderForm() {
-// A. Tag Details
 const [tagType, setTagType]   = useState("Luggage Tag")
 const [shape, setShape]       = useState("Rectangle")
 const [size, setSize]         = useState("Medium (8x5 cm)")
 const [customSize, setCustomSize] = useState("")
 const [qty, setQty]           = useState(1)
 
-// B. Material
 const [material, setMaterial]     = useState("PVC Plastic")
 const [thickness, setThickness]   = useState("1mm")
 
-// C. Print
 const [printType, setPrintType]       = useState("Single-sided")
 const [printQuality, setPrintQuality] = useState("Standard")
 
-// D. Attachment
 const [strapType, setStrapType] = useState("Plastic Loop")
 const [clipType, setClipType]   = useState("None")
 
-// E. Color & Design
 const [bgColor, setBgColor]         = useState("White")
 const [customColor, setCustomColor] = useState("")
 const [fullCustomDesign, setFullCustomDesign] = useState(false)
 
-// F. Design
 const [designFile, setDesignFile]     = useState(null)
 const [needsDesign, setNeedsDesign]   = useState(false)
 const [instructions, setInstructions] = useState("")
 const designRef = useRef()
 
-// G. Delivery
 const [delivery, setDelivery] = useState("Pickup")
 const [address, setAddress]   = useState("")
 
@@ -293,10 +285,10 @@ alert(`✅ Order submitted!\n\nBag Tag – ${tagType}\nMaterial: ${material}\nSh
 const pricing = computePrice({ material, printType, printQuality, clipType, shape, qty })
 
 const TAG_TYPES = [
-{ val: "Luggage Tag",    icon: "🧳", desc: "Travel identification for suitcases" },
-{ val: "School Bag Tag", icon: "🎒", desc: "Student ID & contact info tags" },
-{ val: "ID Tag",         icon: "🪪", desc: "Branded identification cards" },
-{ val: "Event Tag",      icon: "🎫", desc: "Event passes & wristband labels" },
+{ val: "Luggage Tag",    icon: <MdOutlineLuggage className="text-gray-500" />, desc: "Travel identification for suitcases" },
+{ val: "School Bag Tag", icon: <LuSchool className="text-gray-500" />,         desc: "Student ID & contact info tags" },
+{ val: "ID Tag",         icon: <FiUser className="text-gray-500" />,           desc: "Branded identification cards" },
+{ val: "Event Tag",      icon: <LuTicket className="text-gray-500" />,         desc: "Event passes & wristband labels" },
 ]
 
 const SHAPES = ["Rectangle", "Round", "Oval", "Custom Die-Cut"]
@@ -324,7 +316,7 @@ return (
     <div className="xl:col-span-2 flex flex-col gap-6">
 
     {/* Tag Details */}
-    <SectionCard title="Tag Details" icon="🏷️">
+    <SectionCard title="Tag Details" icon={<FiTag />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Tag Type" required>
@@ -390,7 +382,7 @@ return (
             {errors.qty && <p className="text-[11px] text-red-500 mt-1">{errors.qty}</p>}
             {qty >= 50 && (
             <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-4 py-2 text-xs text-green-700 mt-1">
-                <span>🎉</span>
+                <FiGift className="shrink-0 text-green-500" />
                 <span className="font-semibold">Bulk order! Volume discount may apply — our team will confirm.</span>
             </div>
             )}
@@ -400,17 +392,17 @@ return (
     </SectionCard>
 
     {/* Material Options */}
-    <SectionCard title="Material Options" icon="🧱">
+    <SectionCard title="Material Options" icon={<FiLayers />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Material Type">
             <div className="flex flex-col gap-2">
             <OptionCard active={material === "PVC Plastic"} onClick={() => setMaterial("PVC Plastic")}
-                icon="💳" label="PVC Plastic" sublabel="Durable, waterproof, flexible — most popular choice" badge="₱80 base" />
+                icon={<TbCreditCard className="text-gray-500" />} label="PVC Plastic" sublabel="Durable, waterproof, flexible — most popular choice" badge="₱80 base" />
             <OptionCard active={material === "Acrylic"} onClick={() => setMaterial("Acrylic")}
-                icon="💎" label="Acrylic" sublabel="Clear, premium look — rigid and scratch-resistant" badge="₱120 base" />
+                icon={<TbDiamond className="text-gray-500" />} label="Acrylic" sublabel="Clear, premium look — rigid and scratch-resistant" badge="₱120 base" />
             <OptionCard active={material === "Laminated Card"} onClick={() => setMaterial("Laminated Card")}
-                icon="📄" label="Laminated Card" sublabel="Lightweight paper card with protective lamination" badge="₱50 base" />
+                icon={<TbFileDescription className="text-gray-500" />} label="Laminated Card" sublabel="Lightweight paper card with protective lamination" badge="₱50 base" />
             </div>
         </Field>
 
@@ -433,22 +425,26 @@ return (
     </SectionCard>
 
     {/* Print Options */}
-    <SectionCard title="Print Options" icon="🖨️">
+    <SectionCard title="Print Options" icon={<FiPrinter />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Print Type">
             <div className="flex gap-3">
             <ToggleBtn active={printType === "Single-sided"} onClick={() => setPrintType("Single-sided")}>
-                ◻ Single-sided
+                <span className="flex items-center justify-center gap-2">
+                <FiSquare className="text-base" /> Single-sided
+                </span>
             </ToggleBtn>
             <ToggleBtn active={printType === "Double-sided"} onClick={() => setPrintType("Double-sided")}>
-                ◼ Double-sided
-                <span className="ml-1 text-[10px] opacity-75">(+₱20)</span>
+                <span className="flex items-center justify-center gap-2">
+                <FiMaximize className="text-base" /> Double-sided
+                <span className="text-[10px] opacity-75">(+₱20)</span>
+                </span>
             </ToggleBtn>
             </div>
             {printType === "Double-sided" && (
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 mt-2">
-                <span>💡</span>
+                <FiInfo className="shrink-0 mt-0.5 text-blue-400" />
                 <p>Double-sided allows different designs on front and back — useful for contact info on the reverse.</p>
             </div>
             )}
@@ -457,9 +453,9 @@ return (
         <Field label="Print Quality">
             <div className="flex flex-col gap-2">
             <OptionCard active={printQuality === "Standard"} onClick={() => setPrintQuality("Standard")}
-                icon="🖨️" label="Standard" sublabel="Sharp output suitable for text, logos, and simple graphics" />
+                icon={<FiPrinter className="text-gray-500" />} label="Standard" sublabel="Sharp output suitable for text, logos, and simple graphics" />
             <OptionCard active={printQuality === "High Resolution"} onClick={() => setPrintQuality("High Resolution")}
-                icon="🔬" label="High Resolution" sublabel="Photo-quality detail — ideal for photos and fine artwork" badge="+₱30" />
+                icon={<FiMaximize className="text-gray-500" />} label="High Resolution" sublabel="Photo-quality detail — ideal for photos and fine artwork" badge="+₱30" />
             </div>
         </Field>
 
@@ -467,28 +463,28 @@ return (
     </SectionCard>
 
     {/* Attachment Options */}
-    <SectionCard title="Attachment Options" icon="🔗">
+    <SectionCard title="Attachment Options" icon={<FiLink />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Strap Type">
             <div className="flex flex-col gap-2">
             <OptionCard active={strapType === "Plastic Loop"} onClick={() => setStrapType("Plastic Loop")}
-                icon="🔵" label="Plastic Loop" sublabel="Standard flexible loop — attaches to any bag handle" />
+                icon={<FiCircle className="text-gray-500" />} label="Plastic Loop" sublabel="Standard flexible loop — attaches to any bag handle" />
             <OptionCard active={strapType === "Metal Ring"} onClick={() => setStrapType("Metal Ring")}
-                icon="⭕" label="Metal Ring" sublabel="Sturdy stainless ring — premium and long-lasting" badge="+₱15" />
+                icon={<FiCircle className="text-gray-400" />} label="Metal Ring" sublabel="Sturdy stainless ring — premium and long-lasting" badge="+₱15" />
             <OptionCard active={strapType === "String"} onClick={() => setStrapType("String")}
-                icon="🪢" label="String" sublabel="Classic rope or twine tie — ideal for gift and event tags" />
+                icon={<FiLink className="text-gray-500" />} label="String" sublabel="Classic rope or twine tie — ideal for gift and event tags" />
             </div>
         </Field>
 
         <Field label="Clip Type">
             <div className="flex flex-col gap-2">
             <OptionCard active={clipType === "None"} onClick={() => setClipType("None")}
-                icon="❌" label="None" sublabel="No clip — strap or ring only" />
+                icon={<FiSlash className="text-gray-500" />} label="None" sublabel="No clip — strap or ring only" />
             <OptionCard active={clipType === "Basic Clip"} onClick={() => setClipType("Basic Clip")}
-                icon="📎" label="Basic Clip" sublabel="Small plastic clip for easy attachment" />
+                icon={<FiPaperclip className="text-gray-500" />} label="Basic Clip" sublabel="Small plastic clip for easy attachment" />
             <OptionCard active={clipType === "Heavy-duty Clip"} onClick={() => setClipType("Heavy-duty Clip")}
-                icon="🔒" label="Heavy-duty Clip" sublabel="Metal carabiner-style clip — secure and durable" badge="+₱25" />
+                icon={<FiLock className="text-gray-500" />} label="Heavy-duty Clip" sublabel="Metal carabiner-style clip — secure and durable" badge="+₱25" />
             </div>
         </Field>
 
@@ -496,7 +492,7 @@ return (
     </SectionCard>
 
     {/* Color & Design */}
-    <SectionCard title="Color & Design" icon="🎨">
+    <SectionCard title="Color & Design" icon={<FiPenTool />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Background Color">
@@ -531,7 +527,7 @@ return (
         <AddOnToggle
             label="Full Custom Design Upload"
             sublabel="Supply your own complete artwork — we print exactly as provided"
-            icon="🖼️"
+            icon={<FiImage />}
             priceLabel="Upload"
             checked={fullCustomDesign}
             onChange={() => setFullCustomDesign(!fullCustomDesign)}
@@ -541,10 +537,9 @@ return (
     </SectionCard>
 
     {/* Design */}
-    <SectionCard title="Design" icon="✏️">
+    <SectionCard title="Design" icon={<FiEdit2 />}>
         <div className="flex flex-col gap-5">
 
-        {/* Preview */}
         <div className="flex justify-center py-6 bg-gray-50 rounded-xl border border-gray-100">
             <BagTagPreview
             shape={shape}
@@ -569,7 +564,10 @@ return (
                 errors.design ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
             } ${needsDesign ? "opacity-50 pointer-events-none" : ""}`}
             >
-            <span className="text-4xl group-hover:scale-110 transition-transform">{designFile ? "✅" : "🖼️"}</span>
+            {designFile
+                ? <FiCheckCircle className="text-4xl text-green-500 group-hover:scale-110 transition-transform" />
+                : <FiImage className="text-4xl text-gray-300 group-hover:scale-110 transition-transform" />
+            }
             {designFile ? (
                 <p className="text-xs text-center text-green-700 font-semibold break-all">{designFile.name}</p>
             ) : (
@@ -586,7 +584,7 @@ return (
             {errors.design && <p className="text-[11px] text-red-500 mt-1">{errors.design}</p>}
             {!needsDesign && (
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700 mt-1">
-                <span>⚠️</span>
+                <FiAlertTriangle className="shrink-0 mt-0.5 text-amber-500" />
                 <p>For small tags, keep text at <strong>minimum 8pt</strong> and avoid thin strokes below 0.5pt. Our team can advise on legibility.</p>
             </div>
             )}
@@ -599,7 +597,7 @@ return (
             needsDesign ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:border-red-300"
             }`}
         >
-            <span className="text-2xl">✏️</span>
+            <FiEdit2 className="text-2xl shrink-0 text-gray-500" />
             <div className="flex-1 min-w-0">
             <p className={`text-sm font-bold ${needsDesign ? "text-red-700" : "text-gray-700"}`}>
                 I need design assistance
@@ -632,21 +630,25 @@ return (
     </SectionCard>
 
     {/* Delivery */}
-    <SectionCard title="Delivery" icon="🚚">
+    <SectionCard title="Delivery" icon={<FiTruck />}>
         <div className="flex flex-col gap-4">
         <Field label="Fulfillment Method">
             <div className="flex gap-3">
             <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
-                🏪 Pickup
+                <span className="flex items-center justify-center gap-2">
+                <FiPackage className="text-base" /> Pickup
+                </span>
             </ToggleBtn>
             <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
-                📦 Delivery
+                <span className="flex items-center justify-center gap-2">
+                <FiTruck className="text-base" /> Delivery
+                </span>
             </ToggleBtn>
             </div>
         </Field>
         {delivery === "Pickup" && (
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span>📍</span>
+            <FiMapPin className="shrink-0 mt-0.5 text-blue-400" />
             <p>You'll receive an SMS when your order is ready for pickup at our store.</p>
             </div>
         )}
@@ -674,7 +676,7 @@ return (
         {/* Tag Preview Card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-linear-to-r from-gray-50 to-white">
-            <span className="text-xl">🏷️</span>
+            <FiTag className="text-xl text-gray-500" />
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-600">Live Preview</h2>
         </div>
         <div className="px-6 py-6 flex justify-center bg-gray-50 min-h-50 not-only:items-center">
@@ -733,15 +735,28 @@ return (
         </div>
         </div>
 
-        {/* Help Card */}
-        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5">
-        <p className="text-xs font-black uppercase tracking-widest text-yellow-700 mb-2">Need Help?</p>
-        <p className="text-xs text-yellow-700 leading-relaxed">
-            Not sure about material or size? Message us on Facebook or email{" "}
-            <a href="mailto:picktwoprint@gmail.com" className="underline font-semibold">
-            picktwoprint@gmail.com
-            </a>
+        {/* Help Card — matched to MousePad format */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💬</span>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+            Not sure about material or size? We're happy to help you spec the perfect bag tag.
         </p>
+        <div className="flex flex-col gap-2">
+            <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            📞 0947-463-1561
+            </a>
+            <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            💬 Chat on Messenger
+            </a>
+            <a href="mailto:picktwoprint@gmail.com"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            ✉️ picktwoprint@gmail.com
+            </a>
+        </div>
         </div>
 
     </div>

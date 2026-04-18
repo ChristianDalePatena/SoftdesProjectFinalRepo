@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
 import {DeliverySection} from "../../shared";
-import { FiTruck } from "react-icons/fi";
+import { FiTruck, FiAlertTriangle, FiImage, FiCheckCircle, FiPaperclip, FiPenTool, FiMaximize } from "react-icons/fi";
+import {FaComputerMouse} from "react-icons/fa6";
+import { LucideLayers } from "lucide-react";
+
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 const inputCls =
@@ -110,7 +113,7 @@ const summaryRows = [
 ]
 
 const SIZE_OPTIONS = [
-{ val: "Small (8×7 in)",   icon: "🟫", desc: "Compact — ideal for tight desks and gaming peripherals" },
+{ val: "Small (8×7 in)",   icon: <FiMaximize className="text-xl shrink-0 text-gray-500" />, desc: "Compact — ideal for tight desks and gaming peripherals" },
 ]
 
 const THICKNESS_OPTIONS = [
@@ -125,7 +128,7 @@ return (
     <div className="xl:col-span-2 flex flex-col gap-6">
 
     {/* Mousepad Details */}
-    <SectionCard title="Mousepad Details" icon="🖱️">
+    <SectionCard title="Mousepad Details" icon={<FaComputerMouse/>}>
         <div className="flex flex-col gap-5">
 
         <Field label="Size">
@@ -177,7 +180,7 @@ return (
     </SectionCard>
 
     {/* Thickness */}
-    <SectionCard title="Thickness" icon="📏">
+    <SectionCard title="Thickness" icon={<LucideLayers/>}>
         <Field label="Pad Thickness" hint="Thicker pads offer more cushioning and a premium feel">
         <div className="flex flex-col gap-2">
             {THICKNESS_OPTIONS.map(({ val, bar, desc, badge }) => (
@@ -209,10 +212,10 @@ return (
     </SectionCard>
 
     {/* Design */}
-    <SectionCard title="Design" icon="🎨">
+    <SectionCard title="Design" icon={<FiPenTool />}>
         <div className="flex flex-col gap-5">
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <span className="shrink-0">⚠️</span>
+            <FiAlertTriangle className="shrink-0 mt-0.5 text-amber-500 text-base" />
             <p>
             Provide your artwork at <strong>300 DPI</strong> matching the pad dimensions. For best print quality, use RGB color mode with a <strong>3mm bleed</strong> on all edges.
             </p>
@@ -223,7 +226,11 @@ return (
             onClick={() => fileRef.current.click()}
             className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl p-6 cursor-pointer hover:border-red-300 hover:bg-red-50 transition group"
             >
-            <span className="text-3xl group-hover:scale-110 transition-transform">{file ? "✅" : "🖼️"}</span>
+            {file ? (
+                <FiCheckCircle className="text-3xl text-green-500 group-hover:scale-110 transition-transform" />
+            ) : (
+                <FiImage className="text-3xl text-gray-300 group-hover:scale-110 transition-transform" />
+            )}
             {file ? (
                 <p className="text-xs text-center text-green-700 font-semibold break-all">{file.name}</p>
             ) : (
@@ -240,7 +247,7 @@ return (
         {file && (
             <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-xl px-4 py-3">
             <div className="flex items-center gap-2">
-                <span>📎</span>
+                <FiPaperclip className="text-green-600 shrink-0" />
                 <span className="text-xs font-semibold text-green-700 break-all">{file.name}</span>
             </div>
             <button type="button" onClick={() => setFile(null)}
@@ -264,7 +271,7 @@ return (
 
         {needsDesign && (
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span>🖌️</span>
+            <FiPenTool className="shrink-0 mt-0.5 text-blue-400" />
             <p>Our team will contact you to discuss your concept, layout boundaries, and shape guides. Design fees may apply based on complexity.</p>
             </div>
         )}

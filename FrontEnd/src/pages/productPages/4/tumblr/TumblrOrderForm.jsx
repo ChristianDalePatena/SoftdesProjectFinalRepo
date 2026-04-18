@@ -1,4 +1,11 @@
 import { useState, useRef } from "react"
+import {
+  FiTruck, FiAlertTriangle, FiImage, FiCheckCircle, FiPaperclip,
+  FiPenTool, FiEdit2, FiPackage, FiStar, FiCoffee, FiSettings,
+  FiDroplet, FiAperture, FiSquare, FiSun, FiZap, FiScissors,
+  FiRefreshCw, FiUser, FiGift, FiTool, FiThermometer, FiBarChart2,
+  FiFolder, FiShoppingBag, FiClipboard, FiInfo, FiMapPin, FiMinus
+} from "react-icons/fi"
 
 // ── Primitives ─────────────────────────────────────────────────────────────────
 const inputCls =
@@ -127,13 +134,10 @@ const tc = colorMap[tumblerColor] || colorMap["Silver"]
 const accent = matAccent[material] || "#94a3b8"
 const isGlass = material === "Glass" || tumblerColor === "Transparent"
 
-// Tumbler shape dimensions
 const cx = 65
 const topY = 28, topW = 34
 const botY = 138, botW = 28
-const bodyH = botY - topY
 
-// Trapezoid body points
 const leftTop = cx - topW, rightTop = cx + topW
 const leftBot = cx - botW, rightBot = cx + botW
 
@@ -143,10 +147,8 @@ return (
 <div className="flex flex-col items-center gap-2">
     <svg width={130} height={170} viewBox="0 0 130 170" xmlns="http://www.w3.org/2000/svg">
 
-    {/* Shadow */}
     <ellipse cx={cx} cy={155} rx={30} ry={5} fill="#e5e7eb" />
 
-    {/* Body */}
     <path
         d={`M${leftTop},${topY} L${rightTop},${topY} L${rightBot},${botY} L${leftBot},${botY} Z`}
         fill={tc.body}
@@ -155,14 +157,12 @@ return (
         opacity={isGlass ? 0.55 : 1}
     />
 
-    {/* Shine highlight */}
     <path
         d={`M${leftTop + 6},${topY + 4} L${leftTop + 12},${topY + 4} L${leftBot + 10},${botY - 4} L${leftBot + 4},${botY - 4} Z`}
         fill={tc.shine}
         opacity={0.35}
     />
 
-    {/* Wrap-around print band */}
     {printPlacement === "Wrap-around (full body)" && (
         <path
         d={`M${leftTop + 2},${topY + 20} L${rightTop - 2},${topY + 20} L${rightBot - 1},${botY - 20} L${leftBot + 1},${botY - 20} Z`}
@@ -171,7 +171,6 @@ return (
         />
     )}
 
-    {/* Front print area */}
     {(printPlacement === "Front" || printPlacement === "Back") && (
         <rect
         x={cx - 16} y={topY + 22}
@@ -182,7 +181,6 @@ return (
         />
     )}
 
-    {/* Design icon */}
     {printPlacement === "Front" && (
         <>
         <circle cx={cx} cy={topY + 43} r={10} fill={accent} opacity={0.35} />
@@ -196,13 +194,10 @@ return (
         <text x={cx} y={topY + 57} textAnchor="middle" fontSize={6.5} fill={accent} fontWeight="bold" opacity={0.8}>360°</text>
     )}
 
-    {/* Capacity label */}
     <text x={cx} y={botY - 8} textAnchor="middle" fontSize={7} fill={tc.text} fontWeight="bold">{capLabel}oz</text>
 
-    {/* Bottom base */}
     <rect x={leftBot} y={botY} width={botW * 2} height={6} rx={3} fill={tc.rim} opacity={0.8} />
 
-    {/* Lid */}
     {lidType === "Slide Lid" && (
         <>
         <rect x={leftTop - 2} y={topY - 14} width={topW * 2 + 4} height={14} rx={4} fill={accent} opacity={0.85} />
@@ -223,7 +218,6 @@ return (
         </>
     )}
 
-    {/* Material badge */}
     <rect x={82} y={12} width={38} height={14} rx={7} fill={accent} opacity={0.9} />
     <text x={101} y={22} textAnchor="middle" fontSize={6.5} fontWeight="bold" fill="white">
         {material === "Stainless Steel" ? "S.STEEL" : material.toUpperCase().slice(0, 6)}
@@ -331,27 +325,27 @@ tempUpgrade && "Temp. Upgrade (+₱30)",
 const TUMBLER_TYPES  = ["Stainless Steel Tumbler", "Plastic Tumbler", "Acrylic Tumbler", "Insulated Travel Mug", "Glass Tumbler"]
 const CAPACITIES     = ["12 oz", "16 oz", "20 oz", "24 oz", "Custom size"]
 const LID_TYPES      = [
-{ val: "Slide Lid",  icon: "↔️", desc: "Simple push-open sliding lid" },
-{ val: "Straw Lid",  icon: "🥤", desc: "Built-in straw hole for sipping" },
-{ val: "Flip Lid",   icon: "🔄", desc: "Click-open flip-top lid" },
+{ val: "Slide Lid",  icon: <FiMinus className="text-gray-500" />,      desc: "Simple push-open sliding lid" },
+{ val: "Straw Lid",  icon: <FiCoffee className="text-gray-500" />,     desc: "Built-in straw hole for sipping" },
+{ val: "Flip Lid",   icon: <FiRefreshCw className="text-gray-500" />,  desc: "Click-open flip-top lid" },
 ]
 const MATERIALS      = [
-{ val: "Stainless Steel", icon: "🔩", desc: "Durable and temperature-retaining", badge: "+₱50" },
-{ val: "Plastic",         icon: "🧴", desc: "Lightweight and budget-friendly" },
-{ val: "Acrylic",         icon: "💎", desc: "Crystal-clear modern look" },
-{ val: "Glass",           icon: "🪟", desc: "Premium clean aesthetic",           badge: "+₱40" },
+{ val: "Stainless Steel", icon: <FiSettings className="text-gray-500" />,  desc: "Durable and temperature-retaining", badge: "+₱50" },
+{ val: "Plastic",         icon: <FiDroplet className="text-gray-500" />,   desc: "Lightweight and budget-friendly" },
+{ val: "Acrylic",         icon: <FiAperture className="text-gray-500" />,  desc: "Crystal-clear modern look" },
+{ val: "Glass",           icon: <FiSquare className="text-gray-500" />,    desc: "Premium clean aesthetic",           badge: "+₱40" },
 ]
 const COLORS         = ["Black", "White", "Silver", "Transparent"]
 const PRINT_METHODS  = [
-{ val: "UV Printing",      icon: "☀️", desc: "Full-color vibrant photo prints",    badge: "+₱20" },
-{ val: "Sublimation",      icon: "🎨", desc: "Dye-infused seamless finish",        badge: "+₱25" },
-{ val: "Laser Engraving",  icon: "⚡", desc: "Etched permanent metallic design",   badge: "+₱30" },
-{ val: "Vinyl Decal",      icon: "✂️", desc: "Cut-vinyl applied graphics" },
+{ val: "UV Printing",      icon: <FiSun className="text-gray-500" />,       desc: "Full-color vibrant photo prints",    badge: "+₱20" },
+{ val: "Sublimation",      icon: <FiPenTool className="text-gray-500" />,   desc: "Dye-infused seamless finish",        badge: "+₱25" },
+{ val: "Laser Engraving",  icon: <FiZap className="text-gray-500" />,       desc: "Etched permanent metallic design",   badge: "+₱30" },
+{ val: "Vinyl Decal",      icon: <FiScissors className="text-gray-500" />,  desc: "Cut-vinyl applied graphics" },
 ]
 const PLACEMENTS     = [
-{ val: "Front",                     icon: "⬜", desc: "One-side front print only" },
-{ val: "Back",                      icon: "⬛", desc: "One-side back print only" },
-{ val: "Wrap-around (full body)",   icon: "🔁", desc: "Full 360° body coverage",   badge: "+₱15" },
+{ val: "Front",                     icon: <FiSquare className="text-gray-500" />,       desc: "One-side front print only" },
+{ val: "Back",                      icon: <FiSquare className="text-gray-400" />,       desc: "One-side back print only" },
+{ val: "Wrap-around (full body)",   icon: <FiRefreshCw className="text-gray-500" />,   desc: "Full 360° body coverage",   badge: "+₱15" },
 ]
 const FONTS          = ["Classic Serif", "Modern Sans", "Script / Cursive", "Bold Display", "Handwritten"]
 
@@ -377,7 +371,7 @@ return (
     <div className="xl:col-span-2 flex flex-col gap-6">
 
     {/* Tumbler Details */}
-    <SectionCard title="Tumbler Details" icon="🥤">
+    <SectionCard title="Tumbler Details" icon={<FiCoffee />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Tumbler Type" required>
@@ -425,7 +419,7 @@ return (
             {errors.quantity && <p className="text-[11px] text-red-500 mt-1">{errors.quantity}</p>}
             {quantity >= 50 && (
             <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-4 py-2 text-xs text-green-700 mt-1">
-                <span>🎉</span>
+                <FiGift className="shrink-0 text-green-500" />
                 <span className="font-semibold">Large order! Contact us for bulk discounts.</span>
             </div>
             )}
@@ -435,7 +429,7 @@ return (
     </SectionCard>
 
     {/* Material & Color */}
-    <SectionCard title="Material & Color" icon="🎨">
+    <SectionCard title="Material & Color" icon={<FiPenTool />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Material" required>
@@ -492,7 +486,7 @@ return (
     </SectionCard>
 
     {/* Customization */}
-    <SectionCard title="Customization Options" icon="✏️">
+    <SectionCard title="Customization Options" icon={<FiEdit2 />}>
         <div className="flex flex-col gap-5">
 
         <Field label="Print Method" required>
@@ -504,7 +498,7 @@ return (
             </div>
             {printMethod === "Laser Engraving" && material !== "Stainless Steel" && material !== "Glass" && (
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700 mt-1">
-                <span>⚠️</span>
+                <FiAlertTriangle className="shrink-0 mt-0.5 text-amber-500" />
                 <p>Laser engraving works best on <strong>Stainless Steel</strong> or <strong>Glass</strong>. Consider updating your material.</p>
             </div>
             )}
@@ -522,10 +516,14 @@ return (
         <Field label="Design Method" required>
             <div className="flex gap-3 mb-3">
             <ToggleBtn active={designMode === "upload"} onClick={() => setDesignMode("upload")}>
-                📁 Upload Design
+                <span className="flex items-center justify-center gap-2">
+                <FiFolder className="text-base" /> Upload Design
+                </span>
             </ToggleBtn>
             <ToggleBtn active={designMode === "text"} onClick={() => setDesignMode("text")}>
-                ✏️ Text-Based
+                <span className="flex items-center justify-center gap-2">
+                <FiEdit2 className="text-base" /> Text-Based
+                </span>
             </ToggleBtn>
             </div>
 
@@ -537,7 +535,10 @@ return (
                     errors.design ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
                 }`}
                 >
-                <span className="text-4xl group-hover:scale-110 transition-transform">{designFile ? "✅" : "🖼️"}</span>
+                {designFile
+                    ? <FiCheckCircle className="text-4xl text-green-500 group-hover:scale-110 transition-transform" />
+                    : <FiImage className="text-4xl text-gray-300 group-hover:scale-110 transition-transform" />
+                }
                 {designFile ? (
                     <p className="text-xs text-center text-green-700 font-semibold break-all">{designFile.name}</p>
                 ) : (
@@ -551,7 +552,7 @@ return (
                 </div>
                 {errors.design && <p className="text-[11px] text-red-500">{errors.design}</p>}
                 <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700 mt-1">
-                <span>⚠️</span>
+                <FiAlertTriangle className="shrink-0 mt-0.5 text-amber-500" />
                 <p>Use the correct wrap template for your tumbler size. Transparent PNG gives the best results on colored tumblers.</p>
                 </div>
             </div>
@@ -591,7 +592,7 @@ return (
                 </Field>
 
                 <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
-                <span>💡</span>
+                <FiInfo className="shrink-0 mt-0.5 text-blue-400" />
                 <p>Our design team will send you a preview within <strong>24–48 hours</strong> for approval before production.</p>
                 </div>
             </div>
@@ -602,21 +603,25 @@ return (
     </SectionCard>
 
     {/* Bulk Order */}
-    <SectionCard title="Order Type" icon="📦">
+    <SectionCard title="Order Type" icon={<FiPackage />}>
         <div className="flex flex-col gap-4">
         <div className="flex gap-3">
             <ToggleBtn active={!bulkOrder} onClick={() => setBulkOrder(false)}>
-            🛍️ Single Design
+            <span className="flex items-center justify-center gap-2">
+                <FiShoppingBag className="text-base" /> Single Design
+            </span>
             </ToggleBtn>
             <ToggleBtn active={bulkOrder} onClick={() => setBulkOrder(true)}>
-            📋 Bulk Order
+            <span className="flex items-center justify-center gap-2">
+                <FiClipboard className="text-base" /> Bulk Order
+            </span>
             </ToggleBtn>
         </div>
 
         {bulkOrder ? (
             <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700">
-                <span className="mt-0.5">📊</span>
+                <FiBarChart2 className="shrink-0 mt-0.5 text-blue-400" />
                 <div>
                 <p className="font-bold mb-1">Bulk Order Personalization</p>
                 <p>Upload a CSV or Excel file with columns: <strong>Name, Custom Text, Variation</strong>. Each row = one unique tumbler.</p>
@@ -628,7 +633,10 @@ return (
                 errors.csvFile ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-red-50"
                 }`}
             >
-                <span className="text-3xl group-hover:scale-110 transition-transform">{csvFile ? "✅" : "📊"}</span>
+                {csvFile
+                ? <FiCheckCircle className="text-3xl text-green-500 group-hover:scale-110 transition-transform" />
+                : <FiBarChart2 className="text-3xl text-gray-300 group-hover:scale-110 transition-transform" />
+                }
                 {csvFile ? (
                 <p className="text-xs text-center text-green-700 font-semibold break-all">{csvFile.name}</p>
                 ) : (
@@ -644,7 +652,7 @@ return (
             </div>
         ) : (
             <div className="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-700">
-            <span className="mt-0.5">✅</span>
+            <FiCheckCircle className="shrink-0 mt-0.5 text-green-500" />
             <p>Single design mode — one artwork applied to all units in your order.</p>
             </div>
         )}
@@ -652,51 +660,55 @@ return (
     </SectionCard>
 
     {/* Add-ons */}
-    <SectionCard title="Add-ons & Extras" icon="⭐">
+    <SectionCard title="Add-ons & Extras" icon={<FiStar />}>
         <div className="flex flex-col gap-3">
         <AddOnToggle
             label="Name Personalization"
             sublabel="Individual name printed or engraved on each tumbler"
-            icon="🪪" priceLabel="+₱10"
+            icon={<FiUser />} priceLabel="+₱10"
             checked={namePerson} onChange={() => setNamePerson(!namePerson)}
         />
         <AddOnToggle
             label="Gift Packaging"
             sublabel="Branded box with tissue wrap — ideal for giveaways and gifting"
-            icon="🎁" priceLabel="+₱15"
+            icon={<FiGift />} priceLabel="+₱15"
             checked={giftPkg} onChange={() => setGiftPkg(!giftPkg)}
         />
         <AddOnToggle
             label="Extra Lid"
             sublabel="An additional spare lid included with your tumbler"
-            icon="🪄" priceLabel="+₱20"
+            icon={<FiTool />} priceLabel="+₱20"
             checked={extraLid} onChange={() => setExtraLid(!extraLid)}
         />
         <AddOnToggle
             label="Straw Inclusion"
             sublabel="BPA-free reusable straw included per unit"
-            icon="🥤" priceLabel="+₱10"
+            icon={<FiCoffee />} priceLabel="+₱10"
             checked={straw} onChange={() => setStraw(!straw)}
         />
         <AddOnToggle
             label="Temperature Retention Upgrade"
             sublabel="Double-wall vacuum insulation — keeps hot/cold longer"
-            icon="🌡️" priceLabel="+₱30"
+            icon={<FiThermometer />} priceLabel="+₱30"
             checked={tempUpgrade} onChange={() => setTempUpgrade(!tempUpgrade)}
         />
         </div>
     </SectionCard>
 
     {/* Delivery */}
-    <SectionCard title="Delivery" icon="🚚">
+    <SectionCard title="Delivery" icon={<FiTruck />}>
         <div className="flex flex-col gap-4">
         <Field label="Delivery Method" required>
             <div className="flex gap-3">
             <ToggleBtn active={delivery === "Pickup"} onClick={() => setDelivery("Pickup")}>
-                🏪 Pickup
+                <span className="flex items-center justify-center gap-2">
+                <FiPackage className="text-base" /> Pickup
+                </span>
             </ToggleBtn>
             <ToggleBtn active={delivery === "Delivery"} onClick={() => setDelivery("Delivery")}>
-                📦 Delivery
+                <span className="flex items-center justify-center gap-2">
+                <FiTruck className="text-base" /> Delivery
+                </span>
             </ToggleBtn>
             </div>
         </Field>
@@ -712,7 +724,7 @@ return (
 
         {delivery === "Pickup" && (
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
-            <span className="mt-0.5">📍</span>
+            <FiMapPin className="shrink-0 mt-0.5 text-blue-400" />
             <p>You selected <strong>Pickup</strong>. We'll contact you when your order is ready at our store.</p>
             </div>
         )}
@@ -728,7 +740,7 @@ return (
         {/* Live Preview */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <span className="text-xl">🥤</span>
+            <FiCoffee className="text-xl text-gray-500" />
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-600">Live Preview</h2>
         </div>
         <div className="px-6 py-6 flex justify-center bg-gray-50 min-h-52 items-center">
@@ -857,15 +869,28 @@ return (
         </div>
         </div>
 
-        {/* Help Card */}
-        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5">
-        <p className="text-xs font-black uppercase tracking-widest text-yellow-700 mb-2">Need Help?</p>
-        <p className="text-xs text-yellow-700 leading-relaxed">
-            Not sure about materials or print methods? Message us on Facebook or email{" "}
-            <a href="mailto:picktwoprint@gmail.com" className="underline font-semibold">
-            picktwoprint@gmail.com
-            </a>
+        {/* Help Card — matched to MousePad format */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💬</span>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+            Not sure about materials or print methods? We're happy to help you spec the perfect tumbler.
         </p>
+        <div className="flex flex-col gap-2">
+            <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            📞 0947-463-1561
+            </a>
+            <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            💬 Chat on Messenger
+            </a>
+            <a href="mailto:picktwoprint@gmail.com"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            ✉️ picktwoprint@gmail.com
+            </a>
+        </div>
         </div>
 
     </div>

@@ -115,16 +115,28 @@ return (
 
 export function HelpCard() {
 return (
-<div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5 flex flex-col gap-2">
-    <p className="text-xs font-bold uppercase tracking-widest text-yellow-700">Need help?</p>
-    <p className="text-xs text-yellow-700 leading-relaxed">
-    Message us on Facebook or email{" "}
-    <a href="mailto:picktwoprint@gmail.com" className="underline font-semibold">
-        picktwoprint@gmail.com
-    </a>{" "}
-    for design assistance.
-    </p>
-</div>
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💬</span>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600">Need Help?</h3>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+            Need help with design templates or bulk orders? We're happy to help you spec the perfect magnet.
+        </p>
+        <div className="flex flex-col gap-2">
+            <a href="tel:+639474631561" className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            📞 0947-463-1561
+            </a>
+            <a href="https://m.me/p2printing" target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            💬 Chat on Messenger
+            </a>
+            <a href="mailto:picktwoprint@gmail.com"
+            className="flex items-center gap-2 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+            ✉️ picktwoprint@gmail.com
+            </a>
+        </div>
+        </div>
 )
 }
 
